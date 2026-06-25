@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 import { Horario } from '../horarios-cg/infrastructure/persistence/horario.entity';
+import { AsignacionHorario } from '../horarios-cg/infrastructure/persistence/asignacion-horario.entity';
 import { Competencia } from '../horarios-cg/infrastructure/persistence/competencia.entity';
 import { SolicitudCambio } from '../horarios-cg/infrastructure/persistence/solicitud-cambio.entity';
 import { Evento } from '../horarios-cg/infrastructure/persistence/evento.entity';
@@ -17,7 +18,7 @@ export const HorariosDataSource = new DataSource({
   database: process.env.HORARIOS_DB_NAME ?? 'horarios_db',
   synchronize: false,
   logging: false,
-  entities: [Horario, Competencia, SolicitudCambio, Evento],
+  entities: [Horario, AsignacionHorario, Competencia, SolicitudCambio, Evento],
   migrations: ['src/database/migrations-horarios/*.ts'],
   migrationsTableName: 'typeorm_migrations',
 });

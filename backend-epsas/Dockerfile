@@ -31,6 +31,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY package*.json ./
 COPY --from=builder /app/dist ./dist
+# src/ + tsconfig se incluyen porque los comandos de migracion de TypeORM
+# (migration:run, migration:run:horarios, migration:run:master) usan
+# ts-node para leer los data-source.ts directamente, no el dist compilado.
+# scripts/ se incluye porque seed:root tambien corre con ts-node.
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/scripts ./scripts
+COPY --from=builder /app/tsconfig*.json ./
 RUN mkdir -p uploads/adjuntos
 # PM2 administra el proceso de Node en producción (auto-restart, logs, métricas).
 # pm2-runtime mantiene el proceso en primer plano, que es lo que espera Docker.
