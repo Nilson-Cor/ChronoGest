@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { RootAuthService } from '../services/root-auth.service';
 
 export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
@@ -19,6 +20,14 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn =>
     router.navigate(['/app/dashboard']);
     return false;
   };
+
+export const rootAuthGuard: CanActivateFn = () => {
+  const rootAuth = inject(RootAuthService);
+  const router = inject(Router);
+  if (rootAuth.isAuthenticated) return true;
+  router.navigate(['/login']);
+  return false;
+};
 
 export const guestGuard: CanActivateFn = () => {
   const auth = inject(AuthService);

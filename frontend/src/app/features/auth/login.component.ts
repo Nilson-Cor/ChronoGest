@@ -2,6 +2,7 @@ import { Component, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { RootAuthService } from '../../core/services/root-auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { SearchableSelectComponent, SSOption } from '../../shared/components/searchable-select.component';
@@ -475,6 +476,7 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private auth: AuthService,
+    private rootAuth: RootAuthService,
     private router: Router,
     private api: ApiService,
     private route: ActivatedRoute,
@@ -518,6 +520,21 @@ export class LoginComponent implements OnInit {
     }
     this.loading.set(true);
     this.error.set('');
+
+    // Credenciales exclusivas de Super Admin (gestión de Centros de Formación) —
+    // se intentan primero y en silencio; si no coinciden, sigue el login normal.
+    if (this.identifier.includes('@')) {
+      this.rootAuth.login(this.identifier, this.password).subscribe({
+        next: () => { this.loading.set(false); this.router.navigate(['/root/centros']); },
+        error: () => this.doNormalLogin(),
+      });
+    } else {
+      this.doNormalLogin();
+    }
+  }
+
+  private doNormalLogin() {
+    this.loading.set(true);
     this.auth.login(this.identifier, this.password).subscribe({
       next: (res) => {
         this.loading.set(false);

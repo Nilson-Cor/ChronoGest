@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard, roleGuard } from './core/guards/auth.guard';
+import { authGuard, guestGuard, roleGuard, rootAuthGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'landing', pathMatch: 'full' },
@@ -120,6 +120,21 @@ export const routes: Routes = [
       },
       // Redirect based on role
       { path: 'dashboard', redirectTo: '/app/admin/dashboard' },
+    ],
+  },
+  // ── Super Admin (gestión global de Centros de Formación / tenants) ──────
+  {
+    path: 'root',
+    canActivate: [rootAuthGuard],
+    loadComponent: () =>
+      import('./features/root/root-layout.component').then((m) => m.RootLayoutComponent),
+    children: [
+      { path: '', redirectTo: 'centros', pathMatch: 'full' },
+      {
+        path: 'centros',
+        loadComponent: () =>
+          import('./features/root/root-centros.component').then((m) => m.RootCentrosComponent),
+      },
     ],
   },
   // ── Dev-admin (solo desarrolladores) ─────────────────────────────────────
