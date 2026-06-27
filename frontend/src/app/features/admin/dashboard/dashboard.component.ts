@@ -1,5 +1,4 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { forkJoin } from 'rxjs';
@@ -10,7 +9,7 @@ import { DIAS_LABELS } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [RouterLink, LucideAngularModule, DonutChartComponent, BarChartComponent],
+  imports: [LucideAngularModule, DonutChartComponent, BarChartComponent],
   template: `
     <!-- WELCOME BANNER -->
     <div class="welcome-banner">
@@ -61,35 +60,6 @@ import { DIAS_LABELS } from '../../../core/models/user.model';
       </div>
     </div>
 
-    <!-- CARD de Solicitudes (Acceso rápido con indicador de pendientes) -->
-    <a class="solicitudes-card mt-6" routerLink="/app/admin/solicitudes">
-      <div class="sol-card-left">
-        <div class="sol-icon-wrap">
-          <lucide-icon name="clipboard-list" [size]="28" style="color:#fff"></lucide-icon>
-        </div>
-        <div>
-          <div class="sol-card-title">Solicitudes de Cambio de Horario</div>
-          <div class="sol-card-sub">
-            Revisa y aprueba las solicitudes enviadas por los instructores líderes.
-          </div>
-        </div>
-      </div>
-      <div class="sol-card-right">
-        @if (solicitudesPendientes() > 0) {
-          <div class="pendientes-badge">
-            <span class="pendientes-count">{{ solicitudesPendientes() }}</span>
-            <span class="pendientes-label">pendiente{{ solicitudesPendientes() !== 1 ? 's' : '' }}</span>
-          </div>
-        } @else {
-          <div class="sin-pendientes">
-            <lucide-icon name="check-circle" [size]="20"></lucide-icon>
-            Al día
-          </div>
-        }
-        <lucide-icon name="arrow-right" [size]="20" style="color:rgba(255,255,255,.7)"></lucide-icon>
-      </div>
-    </a>
-
     <!-- ESTADÍSTICAS GENERALES DEL SISTEMA -->
     <div class="section-title mt-6">
       <lucide-icon name="trending-up" [size]="16"></lucide-icon>
@@ -124,25 +94,6 @@ import { DIAS_LABELS } from '../../../core/models/user.model';
     .banner-text p { color: rgba(255,255,255,.75); font-size: 14px; }
     .banner-icon { opacity: .5; color: #fff; }
 
-    /* Card Solicitudes */
-    .solicitudes-card {
-      display: flex; align-items: center; justify-content: space-between;
-      background: #1d4ed8;
-      border-radius: 14px; padding: 20px 24px; color: #fff;
-      text-decoration: none; transition: all .2s; gap: 16px;
-      box-shadow: 0 4px 20px rgba(29, 78, 216, .3);
-    }
-    .solicitudes-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(29, 78, 216, .4); }
-    .sol-card-left { display: flex; align-items: center; gap: 16px; flex: 1; }
-    .sol-icon-wrap { background: rgba(255,255,255,.2); border-radius: 12px; padding: 12px; flex-shrink: 0; }
-    .sol-card-title { font-size: 16px; font-weight: 800; }
-    .sol-card-sub { font-size: 13px; color: rgba(255,255,255,.75); margin-top: 3px; }
-    .sol-card-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-    .pendientes-badge { display: flex; flex-direction: column; align-items: center; background: #f59e0b; border-radius: 10px; padding: 6px 14px; }
-    .pendientes-count { font-size: 22px; font-weight: 900; color: #fff; line-height: 1; }
-    .pendientes-label { font-size: 10px; color: rgba(255,255,255,.85); font-weight: 700; text-transform: uppercase; }
-    .sin-pendientes { display: flex; align-items: center; gap: 6px; font-size: 13px; color: rgba(255,255,255,.8); }
-
     /* Estadísticas */
     .section-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text); }
     .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
@@ -155,13 +106,11 @@ import { DIAS_LABELS } from '../../../core/models/user.model';
     @media (max-width: 900px) {
       .grid-4 { grid-template-columns: 1fr 1fr; }
       .charts-grid { grid-template-columns: 1fr; }
-      .solicitudes-card { flex-direction: column; align-items: flex-start; }
     }
   `],
 })
 export class AdminDashboardComponent implements OnInit {
   stats = signal({ horarios: 0, ambientes: 0, fichas: 0, instructores: 0 });
-  solicitudesPendientes = signal(0);
 
   private horariosData = signal<any[]>([]);
   private solicitudesData = signal<any[]>([]);
@@ -233,11 +182,6 @@ export class AdminDashboardComponent implements OnInit {
           fichas: Array.isArray(res.fichas) ? res.fichas.filter((f: any) => ['activo', 'activa'].includes(f.estado)).length : 0,
           instructores: res.instructores?.total ?? 0,
         });
-        const pendientes = Array.isArray(res.solicitudes)
-          ? res.solicitudes.filter((s: any) => s.estado === 'pendiente').length
-          : 0;
-        this.solicitudesPendientes.set(pendientes);
-
         this.horariosData.set(Array.isArray(res.horarios) ? res.horarios : []);
         this.solicitudesData.set(Array.isArray(res.solicitudes) ? res.solicitudes : []);
         this.ambientesData.set(Array.isArray(res.ambientes) ? res.ambientes : []);

@@ -136,8 +136,8 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
                           <div class="progress-fill progress-fill-light" [style.width.%]="calcDayProgress(h)"></div>
                         </div>
                         <div class="text-xs text-muted text-right mt-1">{{ calcDayProgress(h) }}%</div>
-                      } @else if (isHoyFinalizado(d, h)) {
-                        <div class="text-xs text-muted text-center mt-2">Horario finalizado</div>
+                      } @else {
+                        <span class="badge inactive" style="margin-top:6px;">inactivo</span>
                       }
                     </div><!-- end card-bottom -->
                   </div><!-- end card-main -->
@@ -721,11 +721,6 @@ export class AprendizMisHorariosComponent implements OnInit {
   // Estamos dentro del rango de tiempo del horario (sin importar activación)
   isEnCursoAp(dia: string, h: any): boolean {
     return this.isToday(dia) && this.enRangoHorario(h);
-  }
-
-  // El horario fue activado hoy pero ya pasó el tiempo fin
-  isHoyFinalizado(dia: string, h: any): boolean {
-    return this.isToday(dia) && this.activacionEsHoy(h) && !this.enRangoHorario(h);
   }
 
   now() { return new Date(); }

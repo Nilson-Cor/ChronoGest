@@ -1,5 +1,4 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { LucideAngularModule } from 'lucide-angular';
@@ -10,7 +9,6 @@ import { DIAS_LABELS } from '../../../core/models/user.model';
 @Component({
   selector: 'app-aprendiz-dashboard',
   imports: [
-    RouterLink,
     LucideAngularModule,
     DonutChartComponent,
     BarChartComponent,
@@ -70,14 +68,6 @@ import { DIAS_LABELS } from '../../../core/models/user.model';
         <app-bar-chart [data]="diaItems()"></app-bar-chart>
       </div>
     </div>
-
-    <div class="mt-6" style="max-width:320px">
-      <a class="quick-card" routerLink="/app/aprendiz/mis-horarios">
-        <div class="quick-icon"><lucide-icon name="calendar" [size]="28"></lucide-icon></div>
-        <div><h4>Mis Horarios</h4><p>Ver el horario de tu ficha asignada</p></div>
-        <span class="quick-link">Ver →</span>
-      </a>
-    </div>
   `,
   styles: [`
     .welcome-banner {
@@ -95,16 +85,6 @@ import { DIAS_LABELS } from '../../../core/models/user.model';
       border: 1px solid var(--border); box-shadow: var(--shadow);
     }
     .chart-card h4 { font-size: 13px; color: var(--text-muted); font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: .03em; }
-    .quick-card {
-      background: var(--surface); border-radius: 12px; padding: 24px;
-      border: 1px solid var(--border); box-shadow: var(--shadow);
-      display: flex; flex-direction: column; gap: 10px; text-decoration: none; transition: all .2s;
-    }
-    .quick-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-    .quick-icon { color: var(--navy); }
-    .quick-card h4 { font-size: 15px; color: var(--text); margin-bottom: 4px; text-transform: none; letter-spacing: 0; }
-    .quick-card p { font-size: 13px; color: var(--text-muted); }
-    .quick-link { font-size: 13px; color: var(--blue); font-weight: 600; }
     @media (max-width: 900px) { .grid-4 { grid-template-columns: 1fr 1fr; } .charts-grid { grid-template-columns: 1fr; } }
   `],
 })
