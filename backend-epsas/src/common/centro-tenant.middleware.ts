@@ -7,7 +7,9 @@ const HOSTS_LOCALES = ['localhost', '127.0.0.1'];
 
 // Rutas de administración global — viven en MASTER_DB, nunca en un tenant.
 // Deben quedar exentas de la resolución por subdominio sin importar el host.
-const PREFIJOS_SIN_TENANT = ['/api/admin/centros-tenant', '/api/root/auth'];
+// Se comparan contra req.originalUrl (ver use()), que sí conserva el prefijo
+// /api; se incluyen ambas variantes (con y sin /api) por seguridad.
+const PREFIJOS_SIN_TENANT = ['/admin/centros-tenant', '/root/auth', '/api/admin/centros-tenant', '/api/root/auth'];
 
 /**
  * CentroTenantMiddleware
@@ -24,7 +26,11 @@ export class CentroTenantMiddleware implements NestMiddleware {
   constructor(private readonly centroDataSourceFactory: CentroDataSourceFactory) {}
 
   async use(req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (PREFIJOS_SIN_TENANT.some((prefijo) => req.path.startsWith(prefijo))) {
+    // req.path/req.url llegan reescritos a "/" en este middleware de modulo
+    // (Nest los monta en un sub-router para aplicar setGlobalPrefix), por eso
+    // se usa req.originalUrl, que conserva la ruta completa real.
+    const rutaReal = req.originalUrl.split('?')[0];
+    if (PREFIJOS_SIN_TENANT.some((prefijo) => rutaReal.startsWith(prefijo))) {
       return next();
     }
 
