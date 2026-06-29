@@ -30,7 +30,7 @@ import { Competencia } from '../horarios-cg/infrastructure/persistence/competenc
 import { SolicitudCambio } from '../horarios-cg/infrastructure/persistence/solicitud-cambio.entity';
 import { Evento } from '../horarios-cg/infrastructure/persistence/evento.entity';
 
-const EPSAS_ENTITIES = [
+export const EPSAS_ENTITIES = [
   Departamento, Municipio, CentroFormacion, Sede, Ambiente,
   Area, Programa, Persona, Curso, Matricula, Aplicativo,
   Rol, Modulo, Servicio, Usuario, Permiso, Credencial, Acceso,

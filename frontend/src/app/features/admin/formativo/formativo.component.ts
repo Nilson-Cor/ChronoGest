@@ -711,10 +711,11 @@ export class AdminFormativoComponent implements OnInit {
         { value: 'inactivo', label: 'Inactivo' }
       ],
       'enum-tipo-ambiente': [
-        { value: 'Ambiente', label: 'Ambiente' },
-        { value: 'Biblioteca', label: 'Biblioteca' },
-        { value: 'Auditorio', label: 'Auditorio' },
-        { value: 'restaurante', label: 'Restaurante' }
+        { value: 'Ambiente', label: 'Ambiente (aula/laboratorio regular)' },
+        { value: 'auditorio', label: 'Auditorio' },
+        { value: 'biblioteca', label: 'Biblioteca' },
+        { value: 'restaurante', label: 'Restaurante' },
+        { value: 'centro_deportivo', label: 'Centro Deportivo' },
       ],
       'enum-estado-ambiente': [
         { value: 'activo',   label: 'Activo' },
