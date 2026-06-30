@@ -65,15 +65,16 @@ function slugify(texto: string): string {
             <th>Slug</th>
             <th>Dominio</th>
             <th>Estado</th>
+            <th>Actividad</th>
             <th>Bases de datos</th>
             <th style="width:110px">Acciones</th>
           </tr>
         </thead>
         <tbody>
           @if (loading()) {
-            <tr><td colspan="6" class="empty-cell">Cargando…</td></tr>
+            <tr><td colspan="7" class="empty-cell">Cargando…</td></tr>
           } @else if (!centros().length) {
-            <tr><td colspan="6" class="empty-cell">Sin centros de formación registrados.</td></tr>
+            <tr><td colspan="7" class="empty-cell">Sin centros de formación registrados.</td></tr>
           } @else {
             @for (c of centros(); track c.id) {
               <tr>
@@ -81,6 +82,12 @@ function slugify(texto: string): string {
                 <td><code>{{ c.slug }}</code></td>
                 <td>{{ c.dominio }}</td>
                 <td><span class="badge" [class.active]="c.estado === 'activo'" [class.inactive]="c.estado !== 'activo'">{{ c.estado }}</span></td>
+                <td>
+                  <span class="actividad-badge" [class.conectado]="c.conectado" [title]="c.conectado ? 'Hay al menos una sesión abierta en este centro' : 'Nadie tiene sesión abierta en este centro ahora mismo'">
+                    <span class="actividad-dot"></span>
+                    {{ c.conectado ? 'Conectado' : 'Inactivo' }}
+                  </span>
+                </td>
                 <td style="font-size:12px;color:var(--text-muted)">{{ c.epsasDbName }} · {{ c.horariosDbName }}</td>
                 <td>
                   <div style="display:flex;gap:6px;">
@@ -201,6 +208,13 @@ function slugify(texto: string): string {
     .page-head h2 { font-size: 1.3rem; color: var(--text); margin-bottom: 4px; }
     .page-head p { font-size: 13px; color: var(--text-muted); }
     .empty-cell { text-align: center; padding: 28px; color: var(--text-muted); font-size: 13px; }
+    .actividad-badge {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
+      color: var(--text-muted); background: var(--surface2); padding: 4px 10px; border-radius: 20px;
+    }
+    .actividad-badge.conectado { color: #166534; background: #dcfce7; }
+    .actividad-dot { width: 7px; height: 7px; border-radius: 50%; background: #9ca3af; flex-shrink: 0; }
+    .actividad-badge.conectado .actividad-dot { background: #22c55e; }
     .error-banner { background: #fee2e2; color: #991b1b; border-radius: 8px; padding: 10px 14px; font-size: 13px; }
     .btn-row { display: flex; justify-content: flex-end; gap: 12px; }
     code { background: var(--surface2); padding: 2px 6px; border-radius: 4px; font-size: 12px; }

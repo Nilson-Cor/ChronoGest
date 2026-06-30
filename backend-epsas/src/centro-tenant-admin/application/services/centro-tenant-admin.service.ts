@@ -21,10 +21,10 @@ export interface AdminInicialCreado {
 }
 
 interface ConexionBD {
-  host?: string;
-  port?: number;
-  username?: string;
-  password?: string;
+  host?: string | null;
+  port?: number | null;
+  username?: string | null;
+  password?: string | null;
 }
 
 @Injectable()
@@ -204,9 +204,46 @@ export class CentroTenantAdminService {
     return Number(`9${Date.now()}`.slice(0, 15));
   }
 
-  // Obtener todos los Centros de Formación
-  async obtenerTodos(): Promise<CentroTenant[]> {
-    return await this.centroTenantRepo.obtenerTodos();
+  // Obtener todos los Centros de Formación, con un indicador de actividad
+  // ("¿hay alguien con sesión abierta en este tenant ahora mismo?") aparte
+  // del campo `estado` (que sigue siendo el de habilitar/deshabilitar el
+  // tenant — no se debe confundir uno con el otro).
+  async obtenerTodos(): Promise<(CentroTenant & { conectado: boolean })[]> {
+    const centros = await this.centroTenantRepo.obtenerTodos();
+    return Promise.all(
+      centros.map(async (c) => ({
+        ...c,
+        conectado: await this.tieneSesionesActivas(c.epsasDbName, { host: c.epsasDbHost, port: c.epsasDbPort }),
+      })),
+    );
+  }
+
+  /**
+   * Best-effort: ¿existe al menos una sesión (Acceso) abierta en la epsas_db
+   * de este tenant en las últimas 24h (ventana de expiración del JWT) sin
+   * fecha de salida? Si la base no es alcanzable, se asume "sin actividad"
+   * en vez de fallar toda la lista de centros.
+   */
+  private async tieneSesionesActivas(epsasDbName: string, conexion: ConexionBD): Promise<boolean> {
+    const dataSource = new DataSource({
+      type: 'postgres',
+      host: conexion.host ?? process.env.DB_HOST,
+      port: conexion.port ?? parseInt(process.env.DB_PORT ?? '5435', 10),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: epsasDbName,
+    });
+    try {
+      await dataSource.initialize();
+      const filas = await dataSource.query(
+        `SELECT 1 FROM accesos WHERE estado = 'activo' AND fecha_salida IS NULL AND fecha_ingreso > NOW() - INTERVAL '24 hours' LIMIT 1`,
+      );
+      return filas.length > 0;
+    } catch {
+      return false;
+    } finally {
+      if (dataSource.isInitialized) await dataSource.destroy();
+    }
   }
 
   // Obtener un Centro de Formación por UUID

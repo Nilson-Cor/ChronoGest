@@ -4,6 +4,7 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { RootAuthService } from '../../core/services/root-auth.service';
 import { ApiService } from '../../core/services/api.service';
+import { TenantService } from '../../core/services/tenant.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { SearchableSelectComponent, SSOption } from '../../shared/components/searchable-select.component';
 
@@ -57,6 +58,13 @@ type AuthView = 'login' | 'pin' | 'register' | 'forgot' | 'verify-code' | 'reset
           <p class="rp-sub">Ingresa tus credenciales para acceder al sistema</p>
 
           <form (ngSubmit)="doLogin()" #loginForm="ngForm">
+            <div class="form-group mt-4">
+              <label class="form-label">Centro de Formación</label>
+              <input class="form-control" type="text" [ngModel]="centroSlug"
+                     (ngModelChange)="onCentroSlugChange($event)"
+                     name="centroSlug" placeholder="default" [ngModelOptions]="{standalone: true}">
+              <span class="form-hint">El identificador (slug) de tu Centro de Formación. Pídeselo a tu administrador si no lo conoces.</span>
+            </div>
             <div class="form-group mt-4">
               <label class="form-label">Número de documento o correo</label>
               <input class="form-control" type="text" [(ngModel)]="identifier"
@@ -474,13 +482,23 @@ export class LoginComponent implements OnInit {
     { icon: 'layout-dashboard', title: 'Fichas' },
   ];
 
+  centroSlug = 'default';
+
   constructor(
     private auth: AuthService,
     private rootAuth: RootAuthService,
     private router: Router,
     private api: ApiService,
     private route: ActivatedRoute,
-  ) {}
+    public tenant: TenantService,
+  ) {
+    this.centroSlug = this.tenant.slug;
+  }
+
+  onCentroSlugChange(valor: string) {
+    this.centroSlug = valor;
+    this.tenant.setSlug(valor.trim() || 'default');
+  }
 
   ngOnInit() {
     this.route.queryParamMap.subscribe(params => {

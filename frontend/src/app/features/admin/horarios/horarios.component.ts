@@ -8,6 +8,17 @@ import { LucideAngularModule } from 'lucide-angular';
 import { SearchableSelectComponent, SSOption } from '../../../shared/components/searchable-select.component';
 import { ToastService } from '../../../core/services/toast.service';
 
+/** "YYYY-MM-DD" (o con hora) -> inicio del día en hora LOCAL — nunca medianoche UTC. */
+function fechaInicioDelDia(fecha: string): Date {
+  return new Date(fecha.slice(0, 10) + 'T00:00:00');
+}
+/** "YYYY-MM-DD" (o con hora) -> fin del día en hora LOCAL. Sin esto, comparar
+ *  contra new Date("YYYY-MM-DD") (medianoche UTC) corta la vigencia varias
+ *  horas antes de que termine el día en Colombia (UTC-5). */
+function fechaFinDelDia(fecha: string): Date {
+  return new Date(fecha.slice(0, 10) + 'T23:59:59');
+}
+
 const JORNADAS = [
   { key: 'manana', label: 'Mañana (07:00–12:00)', inicio: '07:00', fin: '12:00' },
   { key: 'tarde', label: 'Tarde (13:00–17:00)', inicio: '13:00', fin: '17:00' },
@@ -1952,16 +1963,16 @@ export class AdminHorariosComponent implements OnInit, OnDestroy {
     // elemento del arreglo sin importar si estaba vencido).
     return h.competencias.find((c: any) => {
       if (!c.fechaInicio) return true;
-      const start = new Date(c.fechaInicio);
-      const end = c.fechaFin ? new Date(c.fechaFin) : new Date('2099-01-01');
+      const start = fechaInicioDelDia(c.fechaInicio);
+      const end = c.fechaFin ? fechaFinDelDia(c.fechaFin) : new Date('2099-01-01T23:59:59');
       return now >= start && now <= end;
     }) ?? null;
   }
 
   getProgresoCompetencia(c: any): number {
     if (!c || !c.fechaInicio) return 0;
-    const start = new Date(c.fechaInicio).getTime();
-    const end = c.fechaFin ? new Date(c.fechaFin).getTime() : new Date().getTime();
+    const start = fechaInicioDelDia(c.fechaInicio).getTime();
+    const end = c.fechaFin ? fechaFinDelDia(c.fechaFin).getTime() : new Date().getTime();
     const now = new Date().getTime();
     if (now < start) return 0;
     if (now > end) return 100;
