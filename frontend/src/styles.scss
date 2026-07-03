@@ -104,7 +104,18 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; color: var(--text); }
   &.approved { background: #dcfce7; color: #166534; }
   &.rejected { background: #fee2e2; color: #991b1b; }
 }
-.dark .badge.inactive { background: #374151; color: #9ca3af; }
+/* Dark mode badge overrides — colores de estado que en light son pastel, en dark son translúcidos */
+.dark .badge.inactive  { background: #374151; color: #9ca3af; }
+.dark .badge.active    { background: rgba(34,197,94,.18);  color: #86efac; }
+.dark .badge.approved  { background: rgba(34,197,94,.18);  color: #86efac; }
+.dark .badge.rejected  { background: rgba(239,68,68,.18);  color: #fca5a5; }
+.dark .badge.pending   { background: rgba(234,179,8,.18);  color: #fde047; }
+
+/* Select y inputs en dark */
+.dark select, .dark input[type="time"], .dark input[type="date"] {
+  background: var(--surface2); color: var(--text); border-color: var(--border);
+}
+.dark .hist-ficha-sel { background: var(--surface2) !important; color: var(--text) !important; }
 
 /* Form elements */
 .form-group { display: flex; flex-direction: column; gap: 5px; }
@@ -251,7 +262,8 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; color: var(--text); }
 .tt-fixed-box {
   position: fixed;
   width: 320px;
-  background: #ffffff;
+  background: var(--surface);
+  color: var(--text);
   border: 2px solid var(--blue);
   padding: 14px 16px;
   border-radius: 10px;

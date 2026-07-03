@@ -960,7 +960,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     .disp-name { font-weight:600;color:var(--text);text-align:center; }
     .disp-area { font-size:10px;color:var(--text-muted);text-align:center;background:var(--surface);border-radius:4px;padding:1px 6px; }
     .disp-status { font-size:11px;color:var(--text-muted);text-align:center; }
-    .disp-hora-input { width:100%; border:1px solid var(--border); border-radius:6px; background:#fff; color:var(--text); outline:none; transition:border-color .15s; }
+    .disp-hora-input { width:100%; border:1px solid var(--border); border-radius:6px; background:var(--surface2); color:var(--text); outline:none; transition:border-color .15s; }
     .disp-hora-input:focus { border-color:var(--blue); }
     .disp-tag { display:inline-flex;align-items:center;background:#dbeafe;color:#1d4ed8;border-radius:10px;padding:1px 8px;font-size:10px;font-weight:700; }
 
@@ -991,14 +991,14 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     .tbl-search-input {
       width: 100%; padding: 6px 10px 6px 32px;
       border: 1px solid var(--border); border-radius: 6px;
-      font-size: 13px; background: #fff; color: var(--text);
+      font-size: 13px; background: var(--surface2); color: var(--text);
       outline: none; transition: border-color .15s;
     }
     .tbl-search-input:focus { border-color: var(--blue); }
     .tbl-results-count { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
 
     /* Estilos Matriciales Fullscreen sin scroll horizontal */
-    .matrix-wrap { width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; overflow-y: visible; display:flex; flex-direction:column; }
+    .matrix-wrap { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; overflow-y: visible; display:flex; flex-direction:column; }
     .matrix-grid { 
       display: grid; 
       grid-template-columns: 140px repeat(6, minmax(0, 1fr)); 
@@ -1011,9 +1011,9 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     .matrix-header-col:last-child { border-right: none; }
     /* Hoy: resaltado azul */
     .matrix-header-col.is-today {
-      background: #eff6ff; border-bottom: 3px solid var(--blue); color: var(--blue);
+      background: rgba(37,99,235,.15); border-bottom: 3px solid var(--blue); color: var(--blue);
     }
-    .matrix-cell.is-today { background: rgba(37,99,235,.03); }
+    .matrix-cell.is-today { background: rgba(37,99,235,.04); }
     .matrix-row-item {
       padding: 12px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; justify-content: center;
       word-break: break-word; min-width: 0;
@@ -1154,8 +1154,8 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
       width: 22px; height: 22px; border-radius: 50%;
       transition: color .15s, background .15s;
     }
-    .card-help-btn:hover { color: var(--blue); background: #eff6ff; }
-    .card-help-active { color: var(--blue) !important; background: #eff6ff !important; }
+    .card-help-btn:hover { color: var(--blue); background: rgba(37,99,235,.12); }
+    .card-help-active { color: var(--blue) !important; background: rgba(37,99,235,.12) !important; }
 
     /* Botón de notificación de evento */
     .ev-notif-btn {
@@ -1225,7 +1225,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     .hist-sections-wrap { flex: 1; overflow-y: auto; padding: 4px 0; }
     .hist-instructor-header {
       display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
-      padding: 10px 16px; background: #f0f4ff;
+      padding: 10px 16px; background: var(--surface2);
       border-left: 4px solid var(--blue); border-radius: 0 8px 0 0;
       margin-top: 8px; margin-bottom: 0;
     }
@@ -1238,7 +1238,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     /* ── Filtro de ficha por instructor ── */
     .hist-ficha-sel {
       height: 28px; padding: 0 8px; font-size: 12px; font-weight: 600;
-      border: 1px solid #bfdbfe; border-radius: 6px;
+      border: 1px solid var(--border); border-radius: 6px;
       background: #fff; color: #1d4ed8; cursor: pointer;
       outline: none; max-width: 130px;
     }
@@ -1255,7 +1255,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     .hist-table thead tr { background: var(--navy); position: sticky; top: 0; z-index: 2; }
     .hist-table th { padding: 10px 14px; color: #fff; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; text-align: left; white-space: nowrap; }
     .hist-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
-    .hist-table tbody tr:hover td { background: #f8faff; }
+    .hist-table tbody tr:hover td { background: var(--surface2); }
     .hist-dia-badge { display:inline-block; background:#eff6ff; color:var(--blue); border-radius:4px; padding:2px 7px; font-size:11px; font-weight:700; text-transform:capitalize; margin-right:4px; }
     .hist-jorn-badge { display:inline-block; background:var(--surface2); color:var(--text-muted); border-radius:4px; padding:2px 7px; font-size:10px; font-weight:600; text-transform:uppercase; }
 
