@@ -11,10 +11,6 @@ export class Aplicativo {
   @Column({ type: 'varchar', length: 200, default: '' })
   nombre: string;
 
-  /** PIN de registro para nuevos usuarios (default: 1234) */
-  @Column({ type: 'varchar', length: 20, name: 'pin_registro', default: '1234' })
-  pinRegistro: string;
-
   @OneToMany(() => Rol, (rol) => rol.aplicativo)
   roles: Rol[];
 

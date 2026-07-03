@@ -6,7 +6,6 @@ import { RegisterDto } from '../../application/dtos/register.dto';
 import { Public } from '../../public.decorator';
 import type { Response, Request as ExpressRequest } from 'express';
 import { JwtAuthGuard } from '../../jwt-auth.guard';
-import { Aplicativo } from '../../../aplicativos/infrastructure/persistence/aplicativo.entity';
 import { Acceso } from '../../../accesos/infrastructure/persistence/acceso.entity';
 import { CentroTenantContextService } from '../../../common/centro-tenant-context.service';
 
@@ -15,10 +14,6 @@ export class AuthController {
     constructor(
         private readonly authService: AuthService,
     ) {}
-
-    private get aplicativoRepo(): Repository<Aplicativo> {
-        return CentroTenantContextService.getEpsasDataSource().getRepository(Aplicativo);
-    }
 
     private get accesoRepo(): Repository<Acceso> {
         return CentroTenantContextService.getEpsasDataSource().getRepository(Acceso);
@@ -72,23 +67,33 @@ export class AuthController {
         return { message: 'Sesión cerrada' };
     }
 
-    @Public()
-    @Post('verify-pin')
-    async verifyPin(@Body() body: { pin: string }) {
-        try {
-            const app = await this.aplicativoRepo.findOne({ where: {} });
-            const pin = (app as any)?.pinRegistro ?? '1234';
-            return { valid: (body.pin ?? '') === pin };
-        } catch {
-            return { valid: (body.pin ?? '') === '1234' };
-        }
-    }
-
     @Patch('cambiar-password')
     async cambiarPassword(@Req() req: ExpressRequest, @Body() body: { passwordActual: string; passwordNuevo: string }) {
         const token = req.cookies?.token ?? (req.headers.authorization?.split(' ')[1]);
         const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString());
         await this.authService.cambiarPassword(payload.login, body.passwordActual, body.passwordNuevo);
         return { mensaje: 'Contraseña actualizada correctamente' };
+    }
+
+    @Public()
+    @Post('forgot-password')
+    async forgotPassword(@Body() body: { correo: string }) {
+        await this.authService.forgotPassword(body.correo);
+        // Siempre responde igual para no revelar si el correo existe
+        return { message: 'Si el correo está registrado recibirás un código de verificación en los próximos minutos.' };
+    }
+
+    @Public()
+    @Post('verify-reset-code')
+    async verifyResetCode(@Body() body: { correo: string; code: string }) {
+        await this.authService.verifyResetCode(body.correo, body.code);
+        return { message: 'Código válido' };
+    }
+
+    @Public()
+    @Post('reset-password')
+    async resetPassword(@Body() body: { correo: string; code: string; newPassword: string }) {
+        await this.authService.resetPassword(body.correo, body.code, body.newPassword);
+        return { message: 'Contraseña actualizada correctamente. Ya puedes iniciar sesión.' };
     }
 }

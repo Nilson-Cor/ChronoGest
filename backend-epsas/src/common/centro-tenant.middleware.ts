@@ -11,7 +11,9 @@ const HOSTS_LOCALES = ['localhost', '127.0.0.1'];
 // /api; se incluyen ambas variantes (con y sin /api) por seguridad.
 const PREFIJOS_SIN_TENANT = [
   '/admin/centros-tenant', '/root/auth', '/auth/login-auto',
+  '/auth/forgot-password', '/auth/verify-reset-code', '/auth/reset-password',
   '/api/admin/centros-tenant', '/api/root/auth', '/api/auth/login-auto',
+  '/api/auth/forgot-password', '/api/auth/verify-reset-code', '/api/auth/reset-password',
 ];
 
 /**

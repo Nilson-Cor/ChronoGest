@@ -220,23 +220,6 @@ export class HorariosAdminController {
         return { ok: true };
     }
 
-    @Get('configuracion')
-    async getConfiguracion() {
-        const apps = await this.aplicativoRepo.find({ take: 1 });
-        const app = apps[0] ?? null;
-        if (!app) return [{ id: null, pin_registro: '1234' }];
-        return [{ id: app.idAplicativo, pin_registro: (app as any).pinRegistro ?? '1234' }];
-    }
-
-    @Put('configuracion/:id')
-    async updateConfiguracion(@Param('id') id: string, @Body() b: any) {
-        const pin = b.pin_registro ?? b.pinRegistro ?? '1234';
-        await this.aplicativoRepo.update(id, { pinRegistro: pin } as any);
-        const apps2 = await this.aplicativoRepo.find({ where: { idAplicativo: id } as any, take: 1 });
-        const a = apps2[0] ?? null;
-        return { id: a?.idAplicativo ?? id, pin_registro: (a as any)?.pinRegistro ?? pin };
-    }
-
     @Get('opts/fichas')
     async getOptsFichas() {
         const list = await this.cursoRepo.find();

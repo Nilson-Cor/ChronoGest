@@ -18,6 +18,9 @@ import { CentroDataSourceFactory } from '../../../database/centro-datasource.fac
 
 @Injectable()
 export class AuthService {
+  // Almacenamiento temporal de códigos de recuperación (en memoria, 10 min TTL)
+  private readonly resetTokens = new Map<string, { code: string; expires: Date; tenantSlug: string }>();
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly centroTenantRepo: CentroTenantRepository,
@@ -232,6 +235,142 @@ export class AuthService {
     if (!valido) throw new UnauthorizedException('La contraseña actual es incorrecta');
     credencial.password = await bcrypt.hash(passwordNuevo, 10);
     await this.credencialRepository.save(credencial);
+  }
+
+  /**
+   * Genera un código de 6 dígitos y lo envía al correo del usuario.
+   * Busca la credencial en todos los tenants activos (como loginAuto).
+   * Siempre responde con el mismo mensaje para no revelar si el correo existe.
+   */
+  async forgotPassword(correo: string): Promise<void> {
+    const tenants = await this.centroTenantRepo.obtenerTodos();
+    const activos = tenants.filter((t) => t.estado === 'activo');
+
+    for (const tenant of activos) {
+      let epsasDs;
+      try {
+        epsasDs = await this.centroDataSourceFactory.getEpsasDataSource(tenant.slug);
+      } catch { continue; }
+
+      const credencial = await epsasDs.getRepository(Credencial).findOne({
+        where: { login: correo },
+        relations: ['usuario', 'usuario.persona'],
+      });
+      if (!credencial) continue;
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
+      this.resetTokens.set(correo, { code, expires, tenantSlug: tenant.slug });
+
+      const nombre = (credencial.usuario?.persona as any)?.nombre ?? '';
+      await this.enviarCodigoReset(correo, code, nombre);
+      return; // encontrado — no seguir buscando
+    }
+    // No revelar si el correo existe o no
+  }
+
+  async verifyResetCode(correo: string, code: string): Promise<void> {
+    const entry = this.resetTokens.get(correo);
+    if (!entry || entry.code !== code || entry.expires < new Date()) {
+      throw new UnauthorizedException('Código inválido o expirado');
+    }
+  }
+
+  async resetPassword(correo: string, code: string, newPassword: string): Promise<void> {
+    const entry = this.resetTokens.get(correo);
+    if (!entry || entry.code !== code || entry.expires < new Date()) {
+      throw new UnauthorizedException('Código inválido o expirado');
+    }
+
+    let epsasDs;
+    try {
+      epsasDs = await this.centroDataSourceFactory.getEpsasDataSource(entry.tenantSlug);
+    } catch {
+      throw new BadRequestException('Error al conectar con el sistema');
+    }
+
+    const credencial = await epsasDs.getRepository(Credencial).findOne({ where: { login: correo } });
+    if (!credencial) throw new UnauthorizedException('Usuario no encontrado');
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await epsasDs.getRepository(Credencial).update({ login: correo }, { password: hashed });
+
+    this.resetTokens.delete(correo);
+  }
+
+  private async enviarCodigoReset(correo: string, code: string, nombre: string): Promise<void> {
+    const smtpHost = process.env.SMTP_HOST;
+
+    // Siempre imprimir en consola en desarrollo para facilitar pruebas
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('\n========================================');
+      console.log(`[ChronoGest] CÓDIGO DE RECUPERACIÓN`);
+      console.log(`  Correo : ${correo}`);
+      console.log(`  Código : ${code}`);
+      console.log(`  Expira : en 10 minutos`);
+      console.log('========================================\n');
+    }
+
+    if (!smtpHost || smtpHost === 'smtp.gmail.com' && !process.env.SMTP_USER?.includes('@gmail.com')) {
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    let nm: any;
+    try { nm = require('nodemailer'); } catch {
+      console.warn('[ChronoGest] nodemailer no instalado — ejecuta "npm install" en backend-epsas/');
+      return;
+    }
+
+    const transporter = nm.createTransport({
+      host: smtpHost,
+      port: Number(process.env.SMTP_PORT ?? 587),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    });
+
+    const html = `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+        <div style="background:#1e3a5f;padding:24px 32px;border-radius:12px 12px 0 0;">
+          <h1 style="color:#fff;margin:0;font-size:20px;">ChronoGest — SENA</h1>
+          <p style="color:rgba(255,255,255,.6);margin:4px 0 0;font-size:13px;">
+            Servicio Nacional de Aprendizaje
+          </p>
+        </div>
+        <div style="background:#f9fafb;padding:32px;border:1px solid #e5e7eb;border-top:0;border-radius:0 0 12px 12px;">
+          <p style="color:#374151;font-size:15px;">
+            Hola${nombre ? ' <strong>' + nombre + '</strong>' : ''},
+          </p>
+          <p style="color:#6b7280;font-size:14px;line-height:1.6;">
+            Recibimos una solicitud para restablecer la contraseña de tu cuenta en ChronoGest.
+            Usa el siguiente código de verificación:
+          </p>
+          <div style="background:#fff;border:2px dashed #1e3a5f;border-radius:10px;
+                      padding:20px;text-align:center;margin:24px 0;">
+            <span style="font-size:36px;font-weight:900;letter-spacing:10px;color:#1e3a5f;">
+              ${code}
+            </span>
+            <p style="color:#9ca3af;font-size:12px;margin:8px 0 0;">
+              Válido por 10 minutos
+            </p>
+          </div>
+          <p style="color:#9ca3af;font-size:12px;line-height:1.6;">
+            Si no solicitaste este cambio, puedes ignorar este mensaje. Tu contraseña no cambiará.
+          </p>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;">
+          <p style="color:#d1d5db;font-size:11px;text-align:center;">
+            ChronoGest &mdash; Sistema de Gestión de Horarios &mdash; SENA Colombia
+          </p>
+        </div>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM ?? `"ChronoGest SENA" <${process.env.SMTP_USER}>`,
+      to: correo,
+      subject: 'ChronoGest — Tu código de recuperación de contraseña',
+      html,
+    });
   }
 
   async validarToken(token: string) {
