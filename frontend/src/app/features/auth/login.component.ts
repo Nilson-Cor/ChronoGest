@@ -272,6 +272,22 @@ type AuthView = 'login' | 'forgot' | 'verify-code' | 'reset-pass';
 
     .text-center { text-align: center; }
 
+    /* La página de login mantiene la estética light siempre, independiente del modo oscuro.
+       Estas reglas son scoped al componente (ViewEncapsulation), por lo que no afectan
+       a otros formularios del sistema. */
+    .right-panel .form-control,
+    .form-control {
+      background: #f9fafb !important;
+      color: #111827 !important;
+      border-color: #e5e7eb !important;
+    }
+    .form-control:focus {
+      background: #fff !important;
+      border-color: #2563eb !important;
+    }
+    .form-control::placeholder { color: #9ca3af !important; }
+    .form-label { color: #6b7280 !important; }
+
     @media (max-width: 768px) {
       .left-panel { display: none; }
       .right-panel { background: #f3f4f6; }

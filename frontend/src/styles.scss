@@ -111,6 +111,11 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; color: var(--text); }
 .dark .badge.rejected  { background: rgba(239,68,68,.18);  color: #fca5a5; }
 .dark .badge.pending   { background: rgba(234,179,8,.18);  color: #fde047; }
 
+/* Status pills del aprendiz (horario activo/en-horario/finalizado) */
+.dark .status-activa     { background: rgba(37,99,235,.25)  !important; color: #93c5fd !important; }
+.dark .status-en-horario { background: rgba(3,105,161,.25)  !important; color: #7dd3fc !important; }
+.dark .status-finalizado { background: rgba(99,102,241,.25) !important; color: #c4b5fd !important; }
+
 /* Select y inputs en dark */
 .dark select, .dark input[type="time"], .dark input[type="date"] {
   background: var(--surface2); color: var(--text); border-color: var(--border);

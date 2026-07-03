@@ -295,7 +295,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
   styles: [`
     .page-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
     
-    .matrix-wrap { width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; overflow-y: visible; display:flex; flex-direction:column; }
+    .matrix-wrap { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; overflow-y: visible; display:flex; flex-direction:column; }
     .matrix-grid { 
       display: grid; 
       grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -305,7 +305,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     .matrix-header-col {
       background: var(--surface2); padding: 12px; font-weight: 800; font-size: 13px; color: var(--text); border-bottom: 2px solid var(--border); border-right: 1px solid var(--border);
     }
-    .matrix-header-col.is-today { background: #e0f2fe; color: var(--blue); }
+    .matrix-header-col.is-today { background: rgba(37,99,235,.12); color: var(--blue); }
     .matrix-cell {
       padding: 8px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); display: flex; align-items: stretch; position: relative;
       background: var(--surface); min-height: 220px;
@@ -321,7 +321,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
       transition: border-color .2s, box-shadow .2s;
       display: flex; flex-direction: column;
     }
-    .horario-card.active-session { border-color: var(--blue); box-shadow: 0 4px 12px rgba(59,130,246,0.15); background: #f8fafc; }
+    .horario-card.active-session { border-color: var(--blue); box-shadow: 0 4px 12px rgba(59,130,246,0.15); background: var(--surface2); }
     .horario-card.en-curso { border-color: var(--blue) !important; box-shadow: 0 0 0 2px rgba(37,99,235,0.13) !important; }
     /* Layout de dos columnas */
     .card-layout {

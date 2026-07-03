@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-dev-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule],
   template: `
     <div class="dev-shell">
       <header class="dev-header">
@@ -15,6 +17,13 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
           <a routerLink="/dev/formativo" routerLinkActive="active">Proyecto Formativo DB</a>
           <a routerLink="/dev/horarios" routerLinkActive="active">Horarios DB</a>
         </nav>
+        <button class="dev-theme-btn" (click)="theme.toggle()" [title]="theme.isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
+          @if (theme.isDark()) {
+            <lucide-icon name="sun" [size]="16"></lucide-icon>
+          } @else {
+            <lucide-icon name="moon" [size]="16"></lucide-icon>
+          }
+        </button>
         <a routerLink="/landing" class="dev-back">← Volver al sistema</a>
       </header>
 
@@ -54,6 +63,13 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
     }
     .dev-nav a:hover { background: #334155; color: #e2e8f0; }
     .dev-nav a.active { background: #1d4ed8; color: #fff; }
+    .dev-theme-btn {
+      width: 32px; height: 32px; border-radius: 7px; border: 1px solid #334155;
+      background: transparent; cursor: pointer; color: #94a3b8;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s; flex-shrink: 0;
+    }
+    .dev-theme-btn:hover { background: #334155; color: #e2e8f0; }
     .dev-back {
       font-size: 12px; color: #64748b; text-decoration: none;
       padding: 6px 10px; border-radius: 6px; transition: all .15s;
@@ -79,4 +95,6 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
     }
   `],
 })
-export class DevLayoutComponent {}
+export class DevLayoutComponent {
+  constructor(public theme: ThemeService) {}
+}

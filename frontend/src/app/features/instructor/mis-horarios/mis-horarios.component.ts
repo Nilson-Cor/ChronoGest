@@ -912,14 +912,14 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     .matrix-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      width: 100%; border: 1px solid var(--border); border-radius: 8px; background: #fff;
+      width: 100%; border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
     }
     .matrix-header-col {
       background: var(--surface2); padding: 12px; font-weight: 800; font-size: 13px; color: var(--text);
       border-bottom: 2px solid var(--border); border-right: 1px solid var(--border); text-align: center;
     }
     .matrix-header-col:last-child { border-right: none; }
-    .matrix-header-col.is-today { background: #eff6ff; border-bottom: 3px solid var(--blue); color: var(--blue); }
+    .matrix-header-col.is-today { background: rgba(37,99,235,.12); border-bottom: 3px solid var(--blue); color: var(--blue); }
 
     .matrix-cell {
       padding: 8px; border-right: 1px solid var(--border); display: flex;
@@ -978,7 +978,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
       font-size: 10px; font-weight: 700; width: fit-content;
     }
     .status-finalizado { background: #e0e7ff; color: #312e81; }
-    .horario-card.active-session { border-color: var(--blue); box-shadow: 0 4px 12px rgba(59,130,246,0.15); background: #f8fafc; }
+    .horario-card.active-session { border-color: var(--blue); box-shadow: 0 4px 12px rgba(59,130,246,0.15); background: var(--surface2); }
     .horario-card.en-curso { border-color: var(--blue) !important; box-shadow: 0 0 0 2px rgba(37,99,235,0.13) !important; }
     .horario-card.en-curso .hb-time { color: var(--blue); }
     .btn-full { width: 100%; }
@@ -1158,18 +1158,18 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     .hist-sections-wrap { flex: 1; overflow-y: auto; padding: 4px 0; }
     .hist-month-header {
       display: flex; align-items: center; gap: 8px;
-      padding: 10px 16px; background: #f0f4ff;
+      padding: 10px 16px; background: var(--surface2);
       border-left: 4px solid var(--blue);
       margin-top: 8px; border-radius: 0 6px 0 0;
-      color: var(--navy); font-size: 13px;
+      color: var(--text); font-size: 13px;
     }
     .hist-table-wrap { overflow-x: auto; }
     .hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .hist-table thead tr { background: var(--navy); position: sticky; top: 0; z-index: 2; }
     .hist-table th { padding: 10px 14px; color: #fff; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; text-align: left; white-space: nowrap; }
     .hist-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
-    .hist-table tbody tr:hover td { background: #f8faff; }
-    .hist-dia-badge { display:inline-block; background:#eff6ff; color:var(--blue); border-radius:4px; padding:2px 7px; font-size:11px; font-weight:700; text-transform:capitalize; margin-right:4px; }
+    .hist-table tbody tr:hover td { background: var(--surface2); }
+    .hist-dia-badge { display:inline-block; background:rgba(37,99,235,.15); color:var(--blue); border-radius:4px; padding:2px 7px; font-size:11px; font-weight:700; text-transform:capitalize; margin-right:4px; }
     .hist-jorn-badge { display:inline-block; background:var(--surface2); color:var(--text-muted); border-radius:4px; padding:2px 7px; font-size:10px; font-weight:600; }
 
     /* ── Tabs de tipo de ubicación ── */
