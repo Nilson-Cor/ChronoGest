@@ -147,7 +147,8 @@ export class AuthService {
 
     const payload = {
       id: personaId, rol, nombre: persona?.nombre ?? '', apellido: (persona as any)?.apellido ?? '',
-      correo: (persona as any)?.correo ?? '', esLider: (persona as any)?.esLider ?? false,
+      correo: (persona as any)?.correo ?? '', fotoPerfil: (persona as any)?.fotoPerfil ?? null,
+      esLider: (persona as any)?.esLider ?? false,
       areaLiderada: (persona as any)?.areaLiderada ?? null, esTransversal: (persona as any)?.esTransversal ?? false,
       fichaId, idUsuario: credencial.usuario.idUsuario, personaId, matriculaIds,
       login: credencial.login, aplicativoId: credencial.usuario.aplicativo?.idAplicativo,
