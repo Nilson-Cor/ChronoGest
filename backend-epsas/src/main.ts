@@ -39,7 +39,9 @@ function requireAuthForUploads(req: Request, res: Response, next: NextFunction):
   try {
     const payload = verifyJwt(token, process.env.JWT_SECRET as string) as { centroSlug?: string };
     const primerSegmento = req.path.split('/').filter(Boolean)[0];
-    const esRutaLegacyPlana = primerSegmento === 'adjuntos';
+    // 'fotos' y 'adjuntos' son rutas legadas sin slug de tenant — se sirven
+    // a cualquier usuario autenticado sin verificar el centroSlug.
+    const esRutaLegacyPlana = primerSegmento === 'adjuntos' || primerSegmento === 'fotos';
     if (!esRutaLegacyPlana && payload.centroSlug && primerSegmento !== payload.centroSlug) {
       res.status(403).json({ message: 'Sin acceso a los archivos de este Centro de Formación' });
       return;
