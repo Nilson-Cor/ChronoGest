@@ -113,7 +113,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
 
       <!-- HEADER "INTEGRADO" DE DISPONIBILIDAD AMBIENTES (Sólo en pestaña ambientes) -->
       @if (activeTab() === 'ambiente') {
-        <div class="matrix-disp-header" style="display:flex; align-items:center; gap:10px; padding:12px 16px; background:#f8fafc; border-bottom:1px solid var(--border); flex-wrap:wrap;">
+        <div class="matrix-disp-header" style="display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--surface2); border-bottom:1px solid var(--border); flex-wrap:wrap;">
           <div style="min-width:130px; flex:1; max-width:160px;">
             <app-ss [options]="dispDiaOpts()" placeholder="Todos los días" [(ngModel)]="dispDia"></app-ss>
           </div>
@@ -134,7 +134,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
         </div>
 
         @if (dispResult().length > 0) {
-          <div style="padding:6px 16px; background:#f0f4ff; border-bottom:1px solid var(--border); font-size:11px; color:var(--text-muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div style="padding:6px 16px; background:var(--surface2); border-bottom:1px solid var(--border); font-size:11px; color:var(--text-muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
             <lucide-icon name="filter" [size]="11" style="opacity:.6;"></lucide-icon>
             <span><strong>{{ dispResultFiltered().length }}</strong> ambiente{{ dispResultFiltered().length !== 1 ? 's' : '' }}
               @if (dispResultFiltered().length !== dispResult().length) { <span style="opacity:.7;">(de {{ dispResult().length }})</span> }
@@ -143,7 +143,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
             @if (dispJornada) { <span class="disp-tag">{{ dispJornada }}</span> }
             @if (dispArea) { <span class="disp-tag">{{ dispArea }}</span> }
           </div>
-          <div class="disp-grid" style="padding:16px; background:#fff; border-bottom: 2px solid var(--border);">
+          <div class="disp-grid" style="padding:16px; background:var(--surface); border-bottom: 2px solid var(--border);">
             @for (a of dispResultFiltered(); track a.id) {
               <div class="disp-card" [class.ocupado]="!a.disponible" [class.disponible-click]="a.disponible"
                    (click)="a.disponible && abrirWizardDesdeAmbiente(a)"

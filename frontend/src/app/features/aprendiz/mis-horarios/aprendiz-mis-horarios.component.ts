@@ -697,7 +697,9 @@ export class AprendizMisHorariosComponent implements OnInit {
         byDay[k].sort((a: any, b: any) => (a.horaInicio ?? '').localeCompare(b.horaInicio ?? ''));
       });
       this.horariosByDay.set(byDay);
-      this.cdr.detectChanges();
+      // Defer detectChanges so Angular's signal scheduler runs first —
+      // avoids Saturday column appearing empty on initial load.
+      setTimeout(() => this.cdr.detectChanges());
     });
   }
 

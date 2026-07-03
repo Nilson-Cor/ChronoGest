@@ -353,7 +353,7 @@ const ROLES_INFO: Record<string, RoleData> = {
     .reg-section { padding: 20px 24px; margin-bottom: 14px; }
     .section-header {
       display: flex; align-items: center; gap: 8px;
-      font-size: 12.5px; font-weight: 700; color: var(--navy);
+      font-size: 12.5px; font-weight: 700; color: var(--text);
       margin-bottom: 16px; padding-bottom: 10px;
       border-bottom: 1px solid var(--border);
       text-transform: uppercase; letter-spacing: .4px;
@@ -391,7 +391,7 @@ const ROLES_INFO: Record<string, RoleData> = {
       position: relative;
     }
     .role-card:hover { border-color: #93c5fd; }
-    .role-card.selected { border-color: var(--navy); background: #eff6ff; }
+    .role-card.selected { border-color: var(--navy); background: rgba(37,99,235,.1); }
     .role-icon-wrap {
       width: 44px; height: 44px; border-radius: 11px;
       display: flex; align-items: center; justify-content: center;
@@ -427,7 +427,7 @@ const ROLES_INFO: Record<string, RoleData> = {
     /* ── Right info panel ────────────────────────── */
     .reg-info-col { position: sticky; top: 16px; }
     .role-info-panel {
-      background: #fff; border-radius: 16px;
+      background: var(--surface); border-radius: 16px;
       border: 1.5px solid var(--border); overflow: hidden;
     }
     .role-info-header {
@@ -470,7 +470,7 @@ const ROLES_INFO: Record<string, RoleData> = {
 
     .info-tip {
       display: flex; align-items: flex-start; gap: 8px;
-      padding: 14px 20px; background: #f8fafc;
+      padding: 14px 20px; background: var(--surface2);
       font-size: 11px; color: var(--text-muted); line-height: 1.5;
     }
 
@@ -480,6 +480,8 @@ const ROLES_INFO: Record<string, RoleData> = {
       .reg-submit-top { display: none; }
       .reg-topbar { flex-wrap: wrap; }
     }
+    :host-context(.dark) .feedback-msg.error   { background: rgba(220,38,38,.15); color: #fca5a5; }
+    :host-context(.dark) .feedback-msg.success { background: rgba(22,163,74,.15);  color: #86efac; }
   `],
 })
 export class RegisterUsuarioComponent implements OnInit {

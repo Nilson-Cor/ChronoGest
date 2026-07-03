@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { RootAuthService } from '../../core/services/root-auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-root-layout',
@@ -34,6 +35,13 @@ import { RootAuthService } from '../../core/services/root-auth.service';
             <span class="header-title">Administración Global de Tenants</span>
             <span class="header-sub">{{ rootAuth.rootEmail() }}</span>
           </div>
+          <button class="theme-btn" (click)="theme.toggle()" [title]="theme.isDark() ? 'Modo claro' : 'Modo oscuro'">
+            @if (theme.isDark()) {
+              <lucide-icon name="sun" [size]="16"></lucide-icon>
+            } @else {
+              <lucide-icon name="moon" [size]="16"></lucide-icon>
+            }
+          </button>
         </header>
         <main class="root-content">
           <router-outlet></router-outlet>
@@ -80,12 +88,20 @@ import { RootAuthService } from '../../core/services/root-auth.service';
       display: flex; align-items: center; padding: 0 24px;
       position: sticky; top: 0; z-index: 40; box-shadow: 0 1px 4px rgba(0,0,0,.06);
     }
-    .header-left { display: flex; flex-direction: column; gap: 1px; }
+    .header-left { display: flex; flex-direction: column; gap: 1px; flex: 1; }
     .header-title { font-size: 14px; font-weight: 700; color: var(--text); }
     .header-sub { font-size: 11px; color: var(--text-muted); }
+    .theme-btn {
+      width: 34px; height: 34px; border-radius: 8px;
+      border: 1.5px solid var(--border); background: transparent;
+      cursor: pointer; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s; flex-shrink: 0;
+    }
+    .theme-btn:hover { background: var(--gray-100); color: var(--text); }
     .root-content { padding: 24px; flex: 1; }
   `],
 })
 export class RootLayoutComponent {
-  constructor(public rootAuth: RootAuthService) {}
+  constructor(public rootAuth: RootAuthService, public theme: ThemeService) {}
 }
