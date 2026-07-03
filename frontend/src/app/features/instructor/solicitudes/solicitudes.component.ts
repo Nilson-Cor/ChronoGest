@@ -25,28 +25,21 @@ import { ToastService } from '../../../core/services/toast.service';
         }
       </div>
 
-      <!-- Filtros de búsqueda -->
+      <!-- Filtro de búsqueda unificado -->
       <div class="filtros-row mt-3">
-        <div class="search-input-wrap">
+        <div class="search-input-wrap" style="flex:1; max-width:480px;">
           <lucide-icon name="search" [size]="14" class="search-icon"></lucide-icon>
-          <input class="search-input" [ngModel]="filtroInstructor()" (ngModelChange)="filtroInstructor.set($event)" placeholder="Buscar por instructor...">
+          <input class="search-input" [ngModel]="filtro()" (ngModelChange)="filtro.set($event)"
+                 placeholder="Buscar por instructor, ficha o ambiente...">
         </div>
-        <div class="search-input-wrap">
-          <lucide-icon name="book-open" [size]="14" class="search-icon"></lucide-icon>
-          <input class="search-input" [ngModel]="filtroFicha()" (ngModelChange)="filtroFicha.set($event)" placeholder="Buscar por ficha...">
-        </div>
-        <div class="search-input-wrap">
-          <lucide-icon name="building-2" [size]="14" class="search-icon"></lucide-icon>
-          <input class="search-input" [ngModel]="filtroAmbiente()" (ngModelChange)="filtroAmbiente.set($event)" placeholder="Buscar por ambiente...">
-        </div>
-        @if (filtroInstructor() || filtroFicha() || filtroAmbiente()) {
-          <button class="btn-clear" (click)="limpiarFiltros()">
+        @if (filtro()) {
+          <button class="btn-clear" (click)="filtro.set('')">
             <lucide-icon name="x" [size]="13"></lucide-icon> Limpiar
           </button>
         }
       </div>
 
-      <div class="horarios-grid mt-3">
+      <div class="horarios-grid mt-5">
         @for (h of horariosFiltrados(); track h.id) {
         <div class="sel-card" [class.selected]="selectedId() === h.id" (click)="selectHorario(h)">
           <div class="sel-time">{{ h.horaInicio?.slice(0,5) }} — {{ h.horaFin?.slice(0,5) }}</div>
@@ -342,10 +335,7 @@ export class InstructorSolicitudesComponent implements OnInit {
   selectedId      = signal<number | null>(null);
   horarioSeleccionado = signal<any>(null);
 
-  // Filtros (señales para que horariosFiltrados se recompute al escribir)
-  filtroInstructor = signal('');
-  filtroFicha      = signal('');
-  filtroAmbiente   = signal('');
+  filtro = signal('');
 
   saving    = signal(false);
   error     = signal('');
@@ -357,20 +347,14 @@ export class InstructorSolicitudesComponent implements OnInit {
   esLider = computed(() => !!this.auth.currentUser()?.areaLiderada);
 
   horariosFiltrados = computed(() => {
-    let lista = this.todosHorarios();
-    const fi = this.filtroInstructor().trim().toLowerCase();
-    const ff = this.filtroFicha().trim().toLowerCase();
-    const fa = this.filtroAmbiente().trim().toLowerCase();
-    if (fi) lista = lista.filter(h =>
-      `${h.instructor?.nombre ?? ''} ${h.instructor?.apellido ?? ''}`.toLowerCase().includes(fi)
+    const q = this.filtro().trim().toLowerCase();
+    if (!q) return this.todosHorarios();
+    return this.todosHorarios().filter(h =>
+      `${h.instructor?.nombre ?? ''} ${h.instructor?.apellido ?? ''}`.toLowerCase().includes(q) ||
+      h.ficha?.codigo?.toLowerCase().includes(q) ||
+      h.ficha?.programa?.toLowerCase().includes(q) ||
+      h.ambiente?.nombre?.toLowerCase().includes(q)
     );
-    if (ff) lista = lista.filter(h =>
-      h.ficha?.codigo?.toLowerCase().includes(ff) || h.ficha?.programa?.toLowerCase().includes(ff)
-    );
-    if (fa) lista = lista.filter(h =>
-      h.ambiente?.nombre?.toLowerCase().includes(fa)
-    );
-    return lista;
   });
 
   ambienteOpts = computed<SSOption[]>(() => {
@@ -468,11 +452,7 @@ export class InstructorSolicitudesComponent implements OnInit {
     }
   }
 
-  limpiarFiltros() {
-    this.filtroInstructor.set('');
-    this.filtroFicha.set('');
-    this.filtroAmbiente.set('');
-  }
+  limpiarFiltros() { this.filtro.set(''); }
 
   selectHorario(h: any) {
     this.selectedId.set(h.id);

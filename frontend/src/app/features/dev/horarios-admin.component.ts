@@ -7,8 +7,7 @@ import { ToastService } from '../../core/services/toast.service';
 type TabKey =
   | 'horarios' | 'competencias'
   | 'eventos'
-  | 'solicitudes' | 'notificaciones'
-  | 'configuracion';
+  | 'solicitudes';
 
 interface ColDef   { key: string; label: string; badge?: boolean; bool?: boolean; }
 interface FieldDef { key: string; label: string; type?: string; opts?: string; required?: boolean; span2?: boolean; }
@@ -253,8 +252,7 @@ export class HorariosAdminComponent implements OnInit {
   tabGroups = [
     { label: 'Horarios',      icon: 'calendar',        tabs: ['horarios', 'competencias'] as TabKey[] },
     { label: 'Espacios',      icon: 'building-2',      tabs: ['eventos'] as TabKey[] },
-    { label: 'Operacional',   icon: 'clipboard-list',  tabs: ['solicitudes', 'notificaciones'] as TabKey[] },
-    { label: 'Sistema',       icon: 'settings',        tabs: ['configuracion'] as TabKey[] },
+    { label: 'Operacional',   icon: 'clipboard-list',  tabs: ['solicitudes'] as TabKey[] },
   ];
 
   private tabMap: Record<TabKey, TabCfg> = {
@@ -328,31 +326,6 @@ export class HorariosAdminComponent implements OnInit {
       load: () => this.api.getHSolicitudes().subscribe({ next: r => this.onLoad(r), error: e => this.onErr(e) }),
     },
 
-    notificaciones: {
-      label: 'Notificaciones', desc: 'Historial de notificaciones (eliminar individual)', viewOnly: true,
-      cols: [
-        { key: 'id', label: 'ID' }, { key: 'tipo', label: 'Tipo' },
-        { key: 'destinatario_id', label: 'Dest. ID' }, { key: 'destinatario_rol', label: 'Rol' },
-        { key: 'leida', label: 'Leída', bool: true }, { key: 'fecha', label: 'Fecha' },
-      ],
-      fields: [],
-      load:   () => this.api.getHNotificaciones().subscribe({ next: r => this.onLoad(r), error: e => this.onErr(e) }),
-      remove: id => this.api.deleteHNotificacion(id),
-    },
-
-    // ── SISTEMA ───────────────────────────────────────────────
-    configuracion: {
-      label: 'Configuración Sistema', desc: 'Parámetros globales (solo editar)', viewOnly: true,
-      cols: [
-        { key: 'id', label: 'ID' }, { key: 'pin_registro', label: 'PIN Registro' },
-        { key: 'updated_at', label: 'Actualizado' },
-      ],
-      fields: [
-        { key: 'pin_registro', label: 'PIN de Registro', required: true },
-      ],
-      load:   () => this.api.getHConfiguracion().subscribe({ next: r => this.onLoad(r), error: e => this.onErr(e) }),
-      update: (id, d) => this.api.updateHConfiguracion(id, d),
-    },
   };
 
   private enumMap: Record<string, { value: string; label: string }[]> = {

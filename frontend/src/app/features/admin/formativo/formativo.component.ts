@@ -48,7 +48,7 @@ interface TabGroup { label: string; icon: string; tabs: TabKey[]; }
           <h3>{{ tabConfig[activeTab()].label }}</h3>
           <p class="text-muted text-xs">{{ tabConfig[activeTab()].desc ?? '' }}</p>
         </div>
-        @if (activeTab() !== 'accesos' && activeTab() !== 'matriculas') {
+        @if (activeTab() !== 'accesos' && activeTab() !== 'matriculas' && activeTab() !== 'centros') {
         <div class="flex gap-2" style="align-items:center;">
           <button class="btn btn-blue" (click)="openModal()">
             <lucide-icon name="plus" [size]="14"></lucide-icon>
@@ -140,9 +140,11 @@ interface TabGroup { label: string; icon: string; tabs: TabKey[]; }
                   <button class="btn-icon-sm edit" (click)="openModal(row)" title="Editar">
                     <lucide-icon name="pencil" [size]="13"></lucide-icon>
                   </button>
+                  @if (activeTab() !== 'centros') {
                   <button class="btn-icon-sm del" (click)="deleteRow(row.id)" title="Eliminar">
                     <lucide-icon name="trash-2" [size]="13"></lucide-icon>
                   </button>
+                  }
                 </div>
               </td>
               }
