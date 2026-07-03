@@ -181,6 +181,8 @@ export class AuthService {
       access_token: token, token,
       user: {
         id: personaId, rol, nombre: persona?.nombre ?? '', apellido: (persona as any)?.apellido ?? '',
+        correo: (persona as any)?.correo ?? '',
+        fotoPerfil: (persona as any)?.fotoPerfil ?? null,
         esLider: (persona as any)?.esLider ?? false, areaLiderada: (persona as any)?.areaLiderada ?? null,
         esTransversal: (persona as any)?.esTransversal ?? false, fichaId, cargo,
         idUsuario: credencial.usuario.idUsuario, aplicativoId: credencial.usuario.aplicativo?.idAplicativo,
