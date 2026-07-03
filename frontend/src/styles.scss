@@ -36,6 +36,11 @@
   --text: #f9fafb;
   --text-muted: #9ca3af;
   --border: #374151;
+  /* Gray overrides so hover states (btn-outline, icon-btn, dropdowns) usen colores oscuros */
+  --gray-50:  #1a2332;
+  --gray-100: #2d3748;
+  --gray-200: #4a5568;
+  --gray-300: #718096;
 }
 
 body:not(.dark) {

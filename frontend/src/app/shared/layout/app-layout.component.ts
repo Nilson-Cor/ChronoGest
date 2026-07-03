@@ -111,7 +111,7 @@ import { environment } from '../../../environments/environment';
             <div class="user-menu" (click)="menuOpen.update(v => !v)">
               <div class="avatar">
                 @if (user()?.fotoPerfil) {
-                  <img [appAuthSrc]="apiOrigin + user()!.fotoPerfil" alt="avatar">
+                  <img [appAuthSrc]="fotoUrl()" alt="avatar">
                 } @else {
                   {{ initials() }}
                 }
@@ -129,7 +129,7 @@ import { environment } from '../../../environments/environment';
             @if (menuOpen()) {
             <div style="position:fixed;inset:0;z-index:98" (click)="menuOpen.set(false)"></div>
             <div class="user-dropdown">
-              <div class="dropdown-item" (click)="profileOpen.set(true); menuOpen.set(false)">
+              <div class="dropdown-item" (click)="openProfile()">
                 <lucide-icon name="user" [size]="15"></lucide-icon> Ver perfil
               </div>
               <div class="dropdown-item">
@@ -138,16 +138,6 @@ import { environment } from '../../../environments/environment';
                   <input type="file" accept="image/*" style="display:none"
                          (change)="onFotoChange($event)">
                 </label>
-              </div>
-              <div class="dropdown-item" (click)="menuOpen.set(false)">
-                <lucide-icon name="key" [size]="15"></lucide-icon> Cambiar contraseña
-              </div>
-              <div class="dropdown-item" (click)="theme.toggle(); menuOpen.set(false)">
-                @if (theme.isDark()) {
-                  <lucide-icon name="sun" [size]="15"></lucide-icon> Modo claro
-                } @else {
-                  <lucide-icon name="moon" [size]="15"></lucide-icon> Modo oscuro
-                }
               </div>
               <hr style="margin:4px 0;border-color:var(--border)">
               <div class="dropdown-item danger" (click)="menuOpen.set(false); auth.logout()">
@@ -264,20 +254,27 @@ import { environment } from '../../../environments/environment';
               <lucide-icon name="x" [size]="18"></lucide-icon>
             </button>
           </div>
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div class="avatar" style="width:64px;height:64px;font-size:24px;border-radius:12px">
-              {{ initials() }}
+          <div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+            <!-- Avatar grande -->
+            <div class="avatar" style="width:72px;height:72px;font-size:26px;border-radius:14px">
+              @if (user()?.fotoPerfil) {
+                <img [appAuthSrc]="fotoUrl()" alt="avatar">
+              } @else {
+                {{ initials() }}
+              }
             </div>
-            <p><strong>Nombre:</strong> {{ user()?.nombre }} {{ user()?.apellido }}</p>
-            <p><strong>Correo:</strong> {{ user()?.correo }}</p>
-            <p><strong>Rol:</strong> {{ roleLabel() }}</p>
-            @if (user()?.esLider) {
-              <p style="display:flex;align-items:center;gap:6px">
-                <strong>Rol especial:</strong>
-                <lucide-icon name="star" [size]="14" style="color:#f59e0b"></lucide-icon>
-                Instructor Líder
-              </p>
-            }
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <p><strong>Nombre:</strong> {{ user()?.nombre }} {{ user()?.apellido }}</p>
+              <p><strong>Correo:</strong> {{ profileCorreo() || '—' }}</p>
+              <p><strong>Rol:</strong> {{ roleLabel() }}</p>
+              @if (user()?.esLider) {
+                <p style="display:flex;align-items:center;gap:6px">
+                  <strong>Rol especial:</strong>
+                  <lucide-icon name="star" [size]="14" style="color:#f59e0b"></lucide-icon>
+                  Instructor Líder
+                </p>
+              }
+            </div>
           </div>
         </div>
       </div>
@@ -467,7 +464,7 @@ import { environment } from '../../../environments/environment';
     .notif-alerta-item {
       padding: 12px 16px; border-bottom: 1px solid var(--border);
       display: flex; flex-direction: column; gap: 4px;
-      background: #fffbeb;
+      background: var(--surface2);
       transition: background .2s;
     }
     .notif-alerta-item.leida { background: var(--surface); opacity: .7; }
@@ -642,20 +639,42 @@ export class AppLayoutComponent implements OnDestroy {
     return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
   }
 
+  /** Abre el perfil y refresca datos del usuario desde /me */
+  openProfile() {
+    this.menuOpen.set(false);
+    this.profileOpen.set(true);
+    this.auth.me().subscribe();
+  }
+
+  /** Correo del usuario actual (puede venir de me() o del token) */
+  profileCorreo = computed(() => (this.auth.currentUser() as any)?.correo ?? '');
+
+  /** URL completa de la foto para appAuthSrc — normaliza si el backend devolvió path relativo */
+  fotoUrl = computed(() => {
+    const fp = this.user()?.fotoPerfil ?? '';
+    if (!fp) return '';
+    // Si ya tiene origen (http), úsala directamente; si es ruta relativa, antepone apiOrigin
+    return fp.startsWith('http') ? fp : this.apiOrigin + fp;
+  });
+
   onFotoChange(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     this.api.uploadFoto(file).subscribe({
       next: (res) => {
-        const url = res.url;
+        // Normaliza: guarda solo la ruta relativa para que fotoUrl() la maneje correctamente
+        const rawUrl = res.url ?? '';
+        const path = rawUrl.startsWith('http')
+          ? rawUrl.replace(/^https?:\/\/[^/]+/, '')
+          : rawUrl;
         const u = this.user()!;
         const endpoint = u.rol === 'admin'
           ? `${environment.apiUrl}/administradores/${u.id}`
           : u.rol === 'instructor'
           ? `${environment.apiUrl}/instructores/${u.id}`
           : `${environment.apiUrl}/aprendices/${u.id}`;
-        this.http.put(endpoint, { fotoPerfil: url }).subscribe();
-        this.auth.updateCurrentUser({ fotoPerfil: url });
+        this.http.put(endpoint, { fotoPerfil: path }).subscribe();
+        this.auth.updateCurrentUser({ fotoPerfil: path });
       },
     });
   }
