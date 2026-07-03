@@ -639,15 +639,42 @@ export class AppLayoutComponent implements OnDestroy {
     return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
   }
 
-  /** Abre el perfil y refresca datos del usuario desde /me */
+  /** Abre el perfil. Extrae correo y fotoPerfil del JWT directamente
+   *  (siempre están en el payload desde el primer login) sin esperar /me. */
   openProfile() {
     this.menuOpen.set(false);
+    // Leer payload del token antes de abrir el modal para que el correo
+    // aparezca al instante, incluso en sesiones antiguas sin re-login.
+    const token = this.auth.token;
+    if (token) {
+      try {
+        const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(b64));
+        const patch: any = {};
+        if (payload.correo && !(this.auth.currentUser() as any)?.correo) patch.correo = payload.correo;
+        if (payload.fotoPerfil !== undefined && !(this.auth.currentUser() as any)?.fotoPerfil) patch.fotoPerfil = payload.fotoPerfil;
+        if (Object.keys(patch).length) this.auth.updateCurrentUser(patch);
+      } catch {}
+    }
     this.profileOpen.set(true);
     this.auth.me().subscribe();
   }
 
-  /** Correo del usuario actual (puede venir de me() o del token) */
-  profileCorreo = computed(() => (this.auth.currentUser() as any)?.correo ?? '');
+  /** Correo del usuario actual — extraído del JWT al abrir perfil */
+  profileCorreo = computed(() => {
+    const correo = (this.auth.currentUser() as any)?.correo ?? '';
+    // Si currentUser no tiene correo, intentar leerlo del JWT directamente
+    if (!correo) {
+      try {
+        const token = this.auth.token;
+        if (token) {
+          const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+          return JSON.parse(atob(b64))?.correo ?? '';
+        }
+      } catch {}
+    }
+    return correo;
+  });
 
   /** URL completa de la foto para appAuthSrc — normaliza si el backend devolvió path relativo */
   fotoUrl = computed(() => {
