@@ -205,7 +205,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
                   <div class="card-top">
                     <div class="info-row"><span class="info-label">Inicio</span><span class="info-val info-time">{{ to12h(h.horaInicio) }}</span></div>
                     <div class="info-row"><span class="info-label">Fin</span><span class="info-val info-time">{{ to12h(h.horaFin) }}</span></div>
-                    <div class="info-row"><span class="info-label">Jornada</span><span class="info-val">{{ h.jornada }}</span></div>
+                    <div class="info-row"><span class="info-label">Jornada</span><span class="info-val">{{ jornadaLabel(h.jornada) }}</span></div>
 
                     <div class="slot-nav-row" [style.visibility]="slots.length > 1 ? 'visible' : 'hidden'">
                       <div class="slot-dots">
@@ -269,10 +269,15 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
                       </div>
                       <div style="font-size:10px;color:var(--text-muted);text-align:right;margin-top:2px;">En curso · {{ calcProgress(h) }}%</div>
                     }
-                    <span class="badge" [class.active]="isActive(h)" [class.inactive]="!isActive(h)"
-                          style="font-size:10px;padding:2px 6px;margin-top:6px;display:inline-block;">
-                      {{ isActive(h) ? 'activo' : 'inactivo' }}
-                    </span>
+                    @if (isActive(h)) {
+                      <span class="badge active" style="font-size:10px;padding:2px 6px;margin-top:6px;display:inline-block;">activo</span>
+                    } @else if (isFinalizadoHoy(h)) {
+                      <div class="status-pill status-finalizado" style="margin-top:6px;">
+                        <lucide-icon name="check-circle" [size]="9"></lucide-icon> Horario finalizado
+                      </div>
+                    } @else {
+                      <span class="badge inactive" style="font-size:10px;padding:2px 6px;margin-top:6px;display:inline-block;">inactivo</span>
+                    }
                   </div>
                 </div>
 
@@ -1075,6 +1080,10 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
 
     /* Badge activo → azul */
     .badge.active { background: #dbeafe !important; color: #1d4ed8 !important; border-color: #bfdbfe !important; }
+
+    /* Badge horario finalizado */
+    .status-pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 3px 8px; font-size: 10px; font-weight: 700; width: fit-content; }
+    .status-finalizado { background: #e0e7ff; color: #312e81; }
 
     /* Trigger + tooltip de ubicación temporal */
     .amb-temp-wrap {
@@ -1908,6 +1917,10 @@ export class AdminHorariosComponent implements OnInit, OnDestroy {
     return ({ formativo: 'book-open', institucional: 'building', evaluacion: 'clipboard-check', festivo: 'umbrella' } as any)[t] ?? 'calendar';
   }
 
+  jornadaLabel(j: string | null | undefined): string {
+    return ({ manana: 'Mañana', tarde: 'Tarde', noche: 'Noche' } as any)[j?.toLowerCase() ?? ''] ?? j ?? '—';
+  }
+
   /** Convierte "HH:MM:SS" o "HH:MM" a formato 12h con am/pm */
   to12h(time: string | null | undefined): string {
     if (!time) return '';
@@ -1942,6 +1955,15 @@ export class AdminHorariosComponent implements OnInit, OnDestroy {
       if (nowMin > eh * 60 + em) return false;
     }
     return true;
+  }
+
+  isFinalizadoHoy(h: any): boolean {
+    if (!h.ultimaActivacion) return false;
+    const act = new Date(h.ultimaActivacion);
+    const hoy = new Date();
+    return act.getFullYear() === hoy.getFullYear() &&
+           act.getMonth()    === hoy.getMonth()    &&
+           act.getDate()     === hoy.getDate();
   }
 
   readonly hoyIso = new Date().toISOString().slice(0, 10);

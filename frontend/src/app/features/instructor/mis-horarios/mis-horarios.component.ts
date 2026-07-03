@@ -5,7 +5,7 @@ import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DIAS_SEMANA, DIAS_LABELS } from '../../../core/models/user.model';
 import { LucideAngularModule } from 'lucide-angular';
-import { DatePipe, UpperCasePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { SearchableSelectComponent, SSOption } from '../../../shared/components/searchable-select.component';
 import { ToastService } from '../../../core/services/toast.service';
 
@@ -56,7 +56,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
 @Component({
   selector: 'app-instructor-mis-horarios',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, LucideAngularModule, DatePipe, UpperCasePipe, SearchableSelectComponent],
+  imports: [FormsModule, LucideAngularModule, DatePipe, SearchableSelectComponent],
   template: `
     <div class="page-header">
       <div><h2>Mis Horarios</h2><p class="text-muted text-sm">Tu programación semanal (Pantalla Completa)</p></div>
@@ -113,7 +113,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
                     <div class="card-top">
                       <div class="info-row"><span class="info-label">Inicio</span><span class="info-val info-time">{{ to12h(h.horaInicio) }}</span></div>
                       <div class="info-row"><span class="info-label">Fin</span><span class="info-val info-time">{{ to12h(h.horaFin) }}</span></div>
-                      <div class="info-row"><span class="info-label">Jornada</span><span class="info-val">{{ h.jornada | uppercase }}</span></div>
+                      <div class="info-row"><span class="info-label">Jornada</span><span class="info-val">{{ jornadaLabel(h.jornada) }}</span></div>
                       <div class="info-row"><span class="info-label">Ficha</span><span class="info-val">{{ h.ficha?.codigo ?? '—' }}</span></div>
                       <div class="info-row"><span class="info-label">Programa</span><span class="info-val">{{ h.ficha?.programa ?? '—' }}</span></div>
                       <div class="info-row">
@@ -208,8 +208,10 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
                         <div class="text-xs text-muted text-right mt-1">En curso · {{ calcProgress(h) }}%</div>
                       }
 
-                      @if(!isHorarioActivo(d, h) && !puedeIniciar(d, h, ambienteSeleccionado()) && h.ultimaActivacion) {
-                        <div class="text-xs text-muted text-center mt-2">Horario finalizado</div>
+                      @if(!isHorarioActivo(d, h) && !puedeIniciar(d, h, ambienteSeleccionado()) && activacionEsHoy(h)) {
+                        <div class="status-pill status-finalizado mt-2">
+                          <lucide-icon name="check-circle" [size]="9"></lucide-icon> Horario finalizado
+                        </div>
                       }
 
                       <button class="btn btn-outline btn-sm btn-full mt-3" style="font-size: 11px;" (click)="openComp(h)">
@@ -263,7 +265,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
             <span class="amb-section-main">Seleccionar Ubicación</span>
             <span class="amb-section-sub">
               {{ to12h(ch?.horaInicio) }} — {{ to12h(ch?.horaFin) }}
-              · {{ ch?.jornada | uppercase }}
+              · {{ jornadaLabel(ch?.jornada) }}
               · {{ ch?.ficha?.codigo }}
             </span>
           </div>
@@ -660,7 +662,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
                       </td>
                       <td>
                         <span class="hist-dia-badge">{{ getDiaLabel(c.horario?.diaSemana) }}</span>
-                        <span class="hist-jorn-badge">{{ c.horario?.jornada || '—' }}</span>
+                        <span class="hist-jorn-badge">{{ jornadaLabel(c.horario?.jornada) }}</span>
                       </td>
                       <td style="font-size:12px;">
                         <strong>{{ c.ficha?.codigo || '—' }}</strong><br>
@@ -970,6 +972,12 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     }
     .card-top { flex: 1; display: flex; flex-direction: column; }
     .card-bottom { display: flex; flex-direction: column; margin-top: 8px; }
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      border-radius: 6px; padding: 3px 8px;
+      font-size: 10px; font-weight: 700; width: fit-content;
+    }
+    .status-finalizado { background: #e0e7ff; color: #312e81; }
     .horario-card.active-session { border-color: var(--blue); box-shadow: 0 4px 12px rgba(59,130,246,0.15); background: #f8fafc; }
     .horario-card.en-curso { border-color: var(--blue) !important; box-shadow: 0 0 0 2px rgba(37,99,235,0.13) !important; }
     .horario-card.en-curso .hb-time { color: var(--blue); }
@@ -1162,7 +1170,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     .hist-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
     .hist-table tbody tr:hover td { background: #f8faff; }
     .hist-dia-badge { display:inline-block; background:#eff6ff; color:var(--blue); border-radius:4px; padding:2px 7px; font-size:11px; font-weight:700; text-transform:capitalize; margin-right:4px; }
-    .hist-jorn-badge { display:inline-block; background:var(--surface2); color:var(--text-muted); border-radius:4px; padding:2px 7px; font-size:10px; font-weight:600; text-transform:uppercase; }
+    .hist-jorn-badge { display:inline-block; background:var(--surface2); color:var(--text-muted); border-radius:4px; padding:2px 7px; font-size:10px; font-weight:600; }
 
     /* ── Tabs de tipo de ubicación ── */
     .ubicacion-tabs {
@@ -1827,6 +1835,10 @@ export class InstructorMisHorariosComponent implements OnInit, OnDestroy {
   }
   hideEventoTooltip() { this.eventoTooltip.set(null); }
 
+  jornadaLabel(j: string | null | undefined): string {
+    return ({ manana: 'Mañana', tarde: 'Tarde', noche: 'Noche' } as any)[j?.toLowerCase() ?? ''] ?? j ?? '—';
+  }
+
   /** Convierte "HH:MM:SS" o "HH:MM" a formato 12h con am/pm */
   to12h(time: string | null | undefined): string {
     if (!time) return '';
@@ -1958,6 +1970,15 @@ export class InstructorMisHorariosComponent implements OnInit, OnDestroy {
     return endMin < startMin
       ? nowMin >= startMin || nowMin <= endMin
       : nowMin >= startMin && nowMin <= endMin;
+  }
+
+  activacionEsHoy(h: any): boolean {
+    if (!h.ultimaActivacion) return false;
+    const act = new Date(h.ultimaActivacion);
+    const hoy = new Date();
+    return act.getFullYear() === hoy.getFullYear() &&
+           act.getMonth()    === hoy.getMonth()    &&
+           act.getDate()     === hoy.getDate();
   }
 
   playHorario(h: any) {

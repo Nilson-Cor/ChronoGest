@@ -1,10 +1,10 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { forkJoin, catchError, of } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DIAS_SEMANA, DIAS_LABELS } from '../../../core/models/user.model';
 import { LucideAngularModule } from 'lucide-angular';
-import { DatePipe, UpperCasePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 
 /** "YYYY-MM-DD" (o con hora) -> inicio del día en hora LOCAL — nunca medianoche UTC. */
 function fechaInicioDelDia(fecha: string): Date {
@@ -52,7 +52,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
 
 @Component({
   selector: 'app-aprendiz-mis-horarios',
-  imports: [LucideAngularModule, DatePipe, UpperCasePipe],
+  imports: [LucideAngularModule, DatePipe],
   template: `
     <div class="page-header">
       <div><h2>Mis Horarios</h2><p class="text-muted text-sm">Tu programación semanal (Pantalla Completa)</p></div>
@@ -82,9 +82,8 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
         <!-- DATA ROW -->
         @for (d of dias; track d) {
         <div class="matrix-cell" style="position: relative;">
-          @if (horariosByDay()[d]?.length) {
-            <div style="display:flex; flex-direction:column; gap:12px; width:100%; height:100%">
-            @for (h of horariosByDay()[d]; track h.id) {
+          <div style="display:flex; flex-direction:column; gap:12px; width:100%; height:100%">
+            @for (h of (horariosByDay()[d] ?? []); track h.id) {
               <div class="horario-card"
                    [class.active-session]="isActivo(d, h)"
                    [class.en-curso]="!isActivo(d, h) && isEnCursoAp(d, h)">
@@ -95,7 +94,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
                     <div class="card-top">
                       <div class="info-row"><span class="info-label">Inicio</span><span class="info-val info-time">{{ to12h(h.horaInicio) }}</span></div>
                       <div class="info-row"><span class="info-label">Fin</span><span class="info-val info-time">{{ to12h(h.horaFin) }}</span></div>
-                      <div class="info-row"><span class="info-label">Jornada</span><span class="info-val">{{ h.jornada | uppercase }}</span></div>
+                      <div class="info-row"><span class="info-label">Jornada</span><span class="info-val">{{ jornadaLabel(h.jornada) }}</span></div>
                       <div class="info-row"><span class="info-label">Instructor</span><span class="info-val">{{ h.instructor?.nombre }} {{ h.instructor?.apellido }}</span></div>
                       <div class="info-row">
                         <span class="info-label">Ambiente</span>
@@ -147,6 +146,10 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
                           <div class="progress-fill progress-fill-light" [style.width.%]="calcDayProgress(h)"></div>
                         </div>
                         <div class="text-xs text-muted text-right mt-1">{{ calcDayProgress(h) }}%</div>
+                      } @else if (isFinalizado(d, h)) {
+                        <div class="status-pill status-finalizado">
+                          <lucide-icon name="check-circle" [size]="9"></lucide-icon> Horario finalizado
+                        </div>
                       } @else {
                         <span class="badge inactive" style="margin-top:6px;">inactivo</span>
                       }
@@ -174,10 +177,10 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
                 </div><!-- end card-layout -->
               </div>
             }
-            </div>
-          } @else {
-            <span style="color:var(--border);font-size:12px; margin: auto;">—</span>
-          }
+            @if (!(horariosByDay()[d]?.length)) {
+              <span style="color:var(--border);font-size:12px; margin: auto;">—</span>
+            }
+          </div>
         </div>
         }
       </div>
@@ -414,6 +417,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     }
     .status-activa      { background: #dbeafe; color: #1d4ed8; }
     .status-en-horario  { background: #f0f9ff; color: #0369a1; }
+    .status-finalizado  { background: #e0e7ff; color: #312e81; }
     .progress-fill-light { background: #93c5fd; }
 
     /* ── Tooltip flotante de Evento ── */
@@ -473,7 +477,7 @@ export class AprendizMisHorariosComponent implements OnInit {
   readonly LABELS = DIAS_LABELS;
   dias = [...DIAS_SEMANA] as string[];
   ficha = signal<any>(null);
-  horariosByDay = signal<Record<string, any[]>>({});
+  horariosByDay = signal<Record<string, any[] | undefined>>({});
   tooltipState = signal<{ h: any; comp: any; compIdx: number; x: number; y: number } | null>(null);
   apCopied = signal(false);
   eventoTooltip = signal<{ ev: any; x: number; y: number } | null>(null);
@@ -500,24 +504,19 @@ export class AprendizMisHorariosComponent implements OnInit {
     });
   });
 
-  constructor(private api: ApiService, public auth: AuthService) {}
+  constructor(private api: ApiService, public auth: AuthService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     const u = this.auth.currentUser();
     if (!u?.id) return;
 
     const iniciar = (fichaId: string) => {
-      // setTimeout(0) difiere la carga al siguiente ciclo del event loop,
-      // DESPUÉS de que cualquier transición de ruta haya terminado.
-      // Esto garantiza que Angular detecte la actualización de señales correctamente.
-      setTimeout(() => {
-        this.cargarDatos(fichaId);
-        this.api.getEventosByFicha(fichaId).pipe(catchError(() => of([]))).subscribe(
-          (e: any[]) => this.eventos.set(e ?? [])
-        );
-      }, 0);
+      this.cargarDatos(fichaId);
+      this.api.getEventosByFicha(fichaId).pipe(catchError(() => of([]))).subscribe(
+        (e: any[]) => this.eventos.set(e ?? [])
+      );
 
-      // Refrescar cada minuto para animar la barra de progreso
+      // Refrescar cada minuto para animar la barra de progreso y el estado "finalizado"
       setInterval(() => {
         this.horariosByDay.set({ ...this.horariosByDay() });
         this.api.getEventosByFicha(fichaId).pipe(catchError(() => of([]))).subscribe(
@@ -698,6 +697,7 @@ export class AprendizMisHorariosComponent implements OnInit {
         byDay[k].sort((a: any, b: any) => (a.horaInicio ?? '').localeCompare(b.horaInicio ?? ''));
       });
       this.horariosByDay.set(byDay);
+      this.cdr.detectChanges();
     });
   }
 
@@ -732,6 +732,19 @@ export class AprendizMisHorariosComponent implements OnInit {
   // Estamos dentro del rango de tiempo del horario (sin importar activación)
   isEnCursoAp(dia: string, h: any): boolean {
     return this.isToday(dia) && this.enRangoHorario(h);
+  }
+
+  // La hora de fin ya pasó
+  private horaFinalizo(h: any): boolean {
+    if (!h.horaFin) return false;
+    const [eh, em] = h.horaFin.split(':').map(Number);
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes() > eh * 60 + em;
+  }
+
+  // El instructor inició la sesión HOY y la hora ya terminó
+  isFinalizado(dia: string, h: any): boolean {
+    return this.isToday(dia) && this.activacionEsHoy(h) && this.horaFinalizo(h);
   }
 
   now() { return new Date(); }
@@ -788,6 +801,10 @@ export class AprendizMisHorariosComponent implements OnInit {
 
   tipoLabelEvento(t: string): string {
     return ({ formativo: 'Formativo', institucional: 'Institucional', evaluacion: 'Evaluación', festivo: 'Festivo / No lectivo' } as any)[t] ?? t;
+  }
+
+  jornadaLabel(j: string): string {
+    return ({ manana: 'Mañana', tarde: 'Tarde', noche: 'Noche' } as any)[j?.toLowerCase()] ?? j ?? '—';
   }
 
   /** Convierte "HH:MM:SS" o "HH:MM" a formato 12h con am/pm */
