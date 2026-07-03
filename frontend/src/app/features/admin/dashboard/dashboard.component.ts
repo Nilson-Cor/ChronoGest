@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { TenantService } from '../../../core/services/tenant.service';
 import { forkJoin } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { DonutChartComponent, DonutSegment } from '../../../shared/components/donut-chart.component';
@@ -16,6 +17,10 @@ import { DIAS_LABELS } from '../../../core/models/user.model';
       <div class="banner-text">
         <h2>¡Bienvenido, {{ user()?.nombre }}!</h2>
         <p>Panel de Administrador — ChronoGest SENA</p>
+        <div class="tenant-pill">
+          <lucide-icon name="building-2" [size]="13"></lucide-icon>
+          {{ centroLabel() }}
+        </div>
       </div>
       <lucide-icon name="settings" [size]="52" class="banner-icon"></lucide-icon>
     </div>
@@ -90,9 +95,15 @@ import { DIAS_LABELS } from '../../../core/models/user.model';
       border-radius: 16px; padding: 32px; color: #fff;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .banner-text h2 { font-size: 1.6rem; margin-bottom: 6px; }
+    .banner-text h2 { font-size: 1.6rem; margin-bottom: 6px; color: #fff; }
     .banner-text p { color: rgba(255,255,255,.75); font-size: 14px; }
     .banner-icon { opacity: .5; color: #fff; }
+    .tenant-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+      border-radius: 20px; padding: 4px 12px; font-size: 12px;
+      color: rgba(255,255,255,.9); margin-top: 10px; font-weight: 600;
+    }
 
     /* Estadísticas */
     .section-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text); }
@@ -164,7 +175,13 @@ export class AdminDashboardComponent implements OnInit {
       .map(([label, value]) => ({ label, value, color: 'var(--blue)' }));
   });
 
-  constructor(private api: ApiService, public auth: AuthService) {}
+  constructor(private api: ApiService, public auth: AuthService, private tenant: TenantService) {}
+
+  centroLabel(): string {
+    const slug = this.tenant.slug;
+    if (!slug || slug === 'default') return 'Centro de Formación';
+    return slug.split(/[-_]/).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
 
   ngOnInit() {
     forkJoin({

@@ -78,7 +78,7 @@ import { LucideAngularModule } from 'lucide-angular';
         <div class="footer-left">
           <div class="footer-logo">
             <lucide-icon name="calendar" [size]="18"></lucide-icon>
-            <span>ChronoGest v2.1-V</span>
+            <span>ChronoGest</span>
           </div>
           <p>Servicio Nacional de Aprendizaje — SENA Colombia</p>
         </div>

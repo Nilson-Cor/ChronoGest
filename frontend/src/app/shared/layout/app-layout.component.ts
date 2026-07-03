@@ -546,7 +546,6 @@ export class AppLayoutComponent implements OnDestroy {
       },
       { icon: 'clipboard-list', label: 'Solicitudes', path: '/app/admin/solicitudes' },
       { icon: 'users', label: 'Usuarios', path: '/app/admin/usuarios' },
-      { icon: 'settings', label: 'Configuración', path: '/app/admin/configuracion' },
     ];
     if (r === 'instructor') return [
       { icon: 'house', label: 'Inicio', path: '/app/instructor/dashboard' },

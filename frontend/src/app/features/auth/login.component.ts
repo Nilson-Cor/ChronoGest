@@ -1,25 +1,22 @@
-import { Component, signal, computed, OnInit } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { RootAuthService } from '../../core/services/root-auth.service';
-import { ApiService } from '../../core/services/api.service';
 import { TenantService } from '../../core/services/tenant.service';
 import { LucideAngularModule } from 'lucide-angular';
-import { SearchableSelectComponent, SSOption } from '../../shared/components/searchable-select.component';
 
-type AuthView = 'login' | 'pin' | 'register' | 'forgot' | 'verify-code' | 'reset-pass';
+type AuthView = 'login' | 'forgot' | 'verify-code' | 'reset-pass';
 
 @Component({
   selector: 'app-login',
   imports: [
     FormsModule, RouterLink,
-    LucideAngularModule, SearchableSelectComponent,
+    LucideAngularModule,
   ],
   template: `
     <div class="login-page">
       <!-- LEFT PANEL -->
-      @if (view() !== 'register') {
       <div class="left-panel">
         <div class="lp-logo">
           <lucide-icon name="calendar" [size]="28" class="lp-logo-icon"></lucide-icon>
@@ -38,12 +35,10 @@ type AuthView = 'login' | 'pin' | 'register' | 'forgot' | 'verify-code' | 'reset
           </div>
           }
         </div>
-        <p class="lp-footer">Sistema de Gestión Académica — v2.1</p>
+        <p class="lp-footer">Sistema de Gestión Académica</p>
       </div>
-      }
-
       <!-- RIGHT PANEL -->
-      <div class="right-panel" [class.full-page]="view() === 'register'">
+      <div class="right-panel">
         <!-- ===== LOGIN ===== -->
         @if (view() === 'login') {
         <div class="form-box">
@@ -103,7 +98,10 @@ type AuthView = 'login' | 'pin' | 'register' | 'forgot' | 'verify-code' | 'reset
           </form>
 
           <div class="login-links">
-            <button class="link-btn" (click)="goToPin()">¿No tienes acceso? Registrarse</button>
+            <button class="link-btn" (click)="view.set('forgot')">
+              <lucide-icon name="key" [size]="12"></lucide-icon>
+              ¿Olvidaste tu contraseña?
+            </button>
           </div>
         </div>
         }
@@ -166,112 +164,8 @@ type AuthView = 'login' | 'pin' | 'register' | 'forgot' | 'verify-code' | 'reset
         </div>
         }
 
-        <!-- ===== REGISTER ===== -->
-        @if (view() === 'register') {
-        <div class="form-box form-scroll">
-          <button class="back-link" (click)="goToLogin()">← Volver al login</button>
-          <h2>Registro de Usuario</h2>
-
-          <!-- Tipo de usuario -->
-          <div class="role-selector">
-            @for (r of roles; track r.key) {
-            <div class="role-card" [class.selected]="regRol === r.key" (click)="regRol = r.key">
-              <lucide-icon [name]="r.icon" [size]="22" class="role-icon"></lucide-icon>
-              <span class="role-name">{{ r.label }}</span>
-            </div>
-            }
-          </div>
-
-          <div class="grid-2 mt-4">
-            <div class="form-group">
-              <label class="form-label">Nombre *</label>
-              <input class="form-control" [(ngModel)]="regForm.nombre" placeholder="Nombre">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Apellido *</label>
-              <input class="form-control" [(ngModel)]="regForm.apellido" placeholder="Apellido">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Tipo Documento *</label>
-              <app-ss [options]="tipoDocOpts" placeholder="Tipo Documento" [(ngModel)]="regForm.tipoDoc"></app-ss>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Número Documento *</label>
-              <input class="form-control" [(ngModel)]="regForm.numDoc" placeholder="Número">
-            </div>
-          </div>
-          <div class="form-group mt-4">
-            <label class="form-label">Correo Electrónico *</label>
-            <input class="form-control" type="email" [(ngModel)]="regForm.correo" placeholder="correo@ejemplo.com">
-          </div>
-          <div class="grid-2 mt-4">
-            <div class="form-group">
-              <label class="form-label">Contraseña *</label>
-              <input class="form-control" type="password" [(ngModel)]="regForm.password" placeholder="••••••">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Teléfono</label>
-              <input class="form-control" [(ngModel)]="regForm.telefono" placeholder="Teléfono">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Municipio</label>
-              <app-ss [options]="municipiosOpts()" placeholder="Seleccionar municipio..." [(ngModel)]="regForm.municipio"></app-ss>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Género</label>
-              <app-ss [options]="generoOpts" placeholder="Seleccionar..." [(ngModel)]="regForm.genero"></app-ss>
-            </div>
-          </div>
-
-          @if (regRol === 'aprendiz' && fichas().length) {
-          <div class="form-group mt-4">
-            <label class="form-label">Asignación de Ficha o Curso *</label>
-            <!-- Filtro por área -->
-            <div style="margin-bottom:8px">
-              <app-ss [options]="areaFiltroOpts()" placeholder="Todas las áreas" [(ngModel)]="areaFiltroReg"></app-ss>
-            </div>
-            <app-ss [options]="fichasOpts()" placeholder="Buscar y seleccionar ficha..." [(ngModel)]="regForm.fichaId"></app-ss>
-          </div>
-          }
-
-          @if (regError()) { <div class="error-msg mt-4">{{ regError() }}</div> }
-          @if (regSuccess()) { <div class="success-msg mt-4">{{ regSuccess() }}</div> }
-
-          <div class="btn-row mt-4">
-            <button class="btn-outline" (click)="goToLogin()">Cancelar</button>
-            <button class="btn-submit" (click)="doRegister()" [disabled]="loading()">
-              Registrar Usuario
-            </button>
-          </div>
-        </div>
-        }
-
       </div>
 
-      <!-- ===== PIN FULL SCREEN MODAL ===== -->
-      @if (view() === 'pin') {
-      <div class="pin-overlay">
-        <div class="pin-modal-box">
-          <div class="modal-icon"><lucide-icon name="lock" [size]="40"></lucide-icon></div>
-          <h2>Acceso Restringido</h2>
-          <p class="rp-sub text-center">Ingresa el PIN de administrador para continuar con el registro</p>
-          <div class="form-group mt-4">
-            <label class="form-label text-center" style="display:block">Código PIN</label>
-            <input class="form-control text-center mx-auto block" type="password" [(ngModel)]="pin"
-                   placeholder="• • • •" maxlength="8" style="max-width:200px">
-          </div>
-          @if (pinError()) {
-          <div class="error-msg text-center mt-3">{{ pinError() }}</div>
-          }
-          <div class="btn-row justify-center mt-4" style="max-width:300px;margin:20px auto 0">
-            <button class="btn-outline" (click)="view.set('login')">← Volver</button>
-            <button class="btn-submit mt-0" (click)="doVerifyPin()" [disabled]="loading()" style="margin-top:0;width:auto;flex:1">
-              Verificar PIN
-            </button>
-          </div>
-        </div>
-      </div>
-      }
     </div>
   `,
   styles: [`
@@ -310,7 +204,6 @@ type AuthView = 'login' | 'pin' | 'register' | 'forgot' | 'verify-code' | 'reset
       overflow-y: auto;
     }
     .form-box { width: 100%; max-width: 420px; }
-    .form-scroll { max-height: 90vh; overflow-y: auto; padding-right: 8px; }
     .back-link {
       display: inline-block; color: #6b7280; font-size: 13px;
       margin-bottom: 24px; cursor: pointer; text-decoration: none;
@@ -347,6 +240,7 @@ type AuthView = 'login' | 'pin' | 'register' | 'forgot' | 'verify-code' | 'reset
       margin-top: 16px; font-size: 13px; color: #6b7280;
     }
     .link-btn {
+      display: flex; align-items: center; gap: 5px;
       background: none; border: none; color: #2563eb; cursor: pointer;
       font-size: 13px; padding: 0;
     }
@@ -376,31 +270,7 @@ type AuthView = 'login' | 'pin' | 'register' | 'forgot' | 'verify-code' | 'reset
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Role selector */
-    .role-selector { display: flex; gap: 10px; margin-top: 16px; }
-    .role-card {
-      flex: 1; border: 2px solid #e5e7eb; border-radius: 10px;
-      padding: 12px 8px; display: flex; flex-direction: column; align-items: center;
-      gap: 6px; cursor: pointer; transition: all .15s;
-    }
-    .role-card.selected { border-color: #1e3a5f; background: #eff6ff; }
-    .role-icon { color: #1e3a5f; }
-    .role-name { font-size: 11px; font-weight: 700; color: #374151; }
-
-    /* Overlay Modal PIN */
-    .pin-overlay {
-      position: fixed; inset: 0; background: rgba(30,58,95,0.85); backdrop-filter: blur(4px);
-      display: flex; justify-content: center; align-items: center; z-index: 9999;
-    }
-    .pin-modal-box {
-      background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-      width: 100%; max-width: 400px;
-    }
     .text-center { text-align: center; }
-    .mx-auto { margin-left: auto; margin-right: auto; }
-    .block { display: block; }
-    .justify-center { justify-content: center; }
-    .full-page { max-width: none !important; justify-content: center; }
 
     @media (max-width: 768px) {
       .left-panel { display: none; }
@@ -420,73 +290,11 @@ export class LoginComponent implements OnInit {
   error = signal('');
   mostrarCentroAvanzado = false;
 
-  // PIN
-  pin = '';
-  pinError = signal('');
-
-  // Register
-  regRol = 'aprendiz';
-  regForm: any = { tipoDoc: 'CC', genero: '' };
-  regError = signal('');
-  regSuccess = signal('');
-  fichas = signal<any[]>([]);
-  areas = signal<string[]>([]);
-  municipios = signal<any[]>([]);
-  searchFicha = '';
-  areaFiltroReg = '';
-
-  readonly tipoDocOpts: SSOption[] = [
-    { value: 'CC', label: 'Cédula (CC)' },
-    { value: 'TI', label: 'Tarjeta Identidad (TI)' },
-    { value: 'CE', label: 'Cédula Extranjería (CE)' },
-    { value: 'PA', label: 'Pasaporte (PA)' },
-  ];
-
-  readonly generoOpts: SSOption[] = [
-    { value: '', label: 'Seleccionar...' },
-    { value: 'M', label: 'Masculino' },
-    { value: 'F', label: 'Femenino' },
-    { value: 'O', label: 'Otro' },
-  ];
-
-  municipiosOpts = computed<SSOption[]>(() => [
-    { value: '', label: 'Seleccionar municipio...' },
-    ...this.municipios().map(m => ({
-      value: m.id ?? m.idMunicipio,     // UUID del municipio (requerido por el backend)
-      label: `${m.nombre} ${m.departamento_nombre ? '(' + m.departamento_nombre + ')' : ''}`
-    }))
-  ]);
-
-  areaFiltroOpts = computed<SSOption[]>(() => [
-    { value: '', label: 'Todas las áreas' },
-    ...this.areas().map(a => ({ value: a, label: a }))
-  ]);
-
-  fichasOpts = computed<SSOption[]>(() => [
-    { value: '', label: 'Seleccionar ficha...' },
-    ...this.filteredFichas().map(f => ({
-      value: f.id,
-      label: `${f.codigo} — ${f.programa}`
-    }))
-  ]);
-
-  filteredFichas() {
-    let list = this.fichas();
-    if (this.areaFiltroReg) list = list.filter((f: any) => f.area === this.areaFiltroReg);
-    return list;
-  }
-
   // Reset password
   resetEmail = '';
   resetCode = '';
   newPassword = '';
   confirmPassword = '';
-
-  roles = [
-    { key: 'aprendiz', icon: 'graduation-cap', label: 'Aprendiz' },
-    { key: 'instructor', icon: 'book-open', label: 'Instructor' },
-    { key: 'admin', icon: 'shield', label: 'Administrador' },
-  ];
 
   modules = [
     { icon: 'calendar', title: 'Horarios' },
@@ -501,7 +309,6 @@ export class LoginComponent implements OnInit {
     private auth: AuthService,
     private rootAuth: RootAuthService,
     private router: Router,
-    private api: ApiService,
     private route: ActivatedRoute,
     public tenant: TenantService,
   ) {
@@ -519,30 +326,6 @@ export class LoginComponent implements OnInit {
         this.sessionExpired.set(true);
       }
     });
-  }
-
-  goToPin() {
-    this.pin = '';
-    this.pinError.set('');
-    this.view.set('pin');
-  }
-
-  goToLogin() {
-    this.resetRegForm();
-    this.view.set('login');
-    this.regSuccess.set('');
-  }
-
-  resetRegForm() {
-    this.regRol = 'aprendiz';
-    this.regForm = {
-      nombre: '', apellido: '', tipoDoc: 'CC', numDoc: '',
-      correo: '', password: '', telefono: '', municipio: '',
-      genero: '', fichaId: ''
-    };
-    this.searchFicha = '';
-    this.areaFiltroReg = '';
-    this.regError.set('');
   }
 
   doLogin() {
@@ -587,66 +370,6 @@ export class LoginComponent implements OnInit {
       error: (e) => {
         this.loading.set(false);
         this.error.set(e?.error?.message ?? 'Credenciales inválidas');
-      },
-    });
-  }
-
-  doVerifyPin() {
-    if (!this.pin) { this.pinError.set('Ingresa el PIN'); return; }
-    this.loading.set(true);
-    this.auth.verifyPin(this.pin).subscribe({
-      next: (res) => {
-        this.loading.set(false);
-        if (res.valid) {
-          this.loadFichas();
-          this.loadMunicipios();
-          this.view.set('register');
-        } else {
-          this.pinError.set('PIN incorrecto');
-        }
-      },
-      error: () => { this.loading.set(false); this.pinError.set('Error verificando PIN'); },
-    });
-  }
-
-  loadFichas() {
-    this.api.getFichas().subscribe({
-      next: (f) => {
-        this.fichas.set(f ?? []);
-        const unique = [...new Set((f ?? []).map((x: any) => x.area).filter(Boolean))].sort() as string[];
-        this.areas.set(unique);
-      },
-      error: () => this.fichas.set([]),
-    });
-  }
-
-  loadMunicipios() {
-    this.api.getMunicipios().subscribe({
-      next: (m) => this.municipios.set(m ?? []),
-      error: () => this.municipios.set([]),
-    });
-  }
-
-  doRegister() {
-    this.regError.set('');
-    const data = { ...this.regForm, rol: this.regRol };
-    if (!data.nombre || !data.apellido || !data.numDoc || !data.correo || !data.password) {
-      this.regError.set('Completa todos los campos obligatorios'); return;
-    }
-    if (this.regRol === 'aprendiz' && !data.fichaId) {
-      this.regError.set('Por favor, selecciona a qué Ficha o Curso perteneces para poder registrarte.'); return;
-    }
-    this.loading.set(true);
-    this.auth.register(data).subscribe({
-      next: () => {
-        this.loading.set(false);
-        this.regSuccess.set('Usuario registrado exitosamente. Los campos han sido borrados por si necesitas ingresar otro.');
-        this.resetRegForm();
-        setTimeout(() => this.regSuccess.set(''), 5000);
-      },
-      error: (e) => {
-        this.loading.set(false);
-        this.regError.set(e?.error?.message ?? 'Error al registrar');
       },
     });
   }

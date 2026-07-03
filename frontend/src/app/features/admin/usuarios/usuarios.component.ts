@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { SearchableSelectComponent, SSOption } from '../../../shared/components/searchable-select.component';
@@ -12,6 +13,10 @@ import { ToastService } from '../../../core/services/toast.service';
   template: `
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
       <div><h2>Usuarios del Sistema</h2><p class="text-muted text-sm">Gestiona todos los usuarios por rol</p></div>
+      <button class="btn btn-primary" (click)="irARegistrar()">
+        <lucide-icon name="user-plus" [size]="15"></lucide-icon>
+        Registrar Usuario
+      </button>
     </div>
 
     <!-- Tabs -->
@@ -374,7 +379,11 @@ export class AdminUsuariosComponent implements OnInit, OnDestroy {
 
   private toast = inject(ToastService);
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private router: Router) {}
+
+  irARegistrar() {
+    this.router.navigate(['/app/admin/usuarios/registrar']);
+  }
 
   ngOnInit() {
     this.loadAll();

@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { TenantService } from '../../../core/services/tenant.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { DonutChartComponent, DonutSegment } from '../../../shared/components/donut-chart.component';
 import { BarChartComponent, BarItem } from '../../../shared/components/bar-chart.component';
@@ -18,6 +19,10 @@ import { DIAS_LABELS } from '../../../core/models/user.model';
       <div class="banner-text">
         <h2>¡Bienvenido, {{ user()?.nombre }}!</h2>
         <p>Panel de Aprendiz — ChronoGest SENA</p>
+        <div class="tenant-pill">
+          <lucide-icon name="building-2" [size]="13"></lucide-icon>
+          {{ centroLabel() }}
+        </div>
       </div>
       <lucide-icon name="graduation-cap" [size]="48" class="banner-icon"></lucide-icon>
     </div>
@@ -75,9 +80,15 @@ import { DIAS_LABELS } from '../../../core/models/user.model';
       border-radius: 16px; padding: 32px; color: #fff;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .banner-text h2 { font-size: 1.5rem; margin-bottom: 6px; }
+    .banner-text h2 { font-size: 1.5rem; margin-bottom: 6px; color: #fff; }
     .banner-text p { color: rgba(255,255,255,.75); font-size: 14px; }
     .banner-icon { opacity: .5; color: #fff; }
+    .tenant-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+      border-radius: 20px; padding: 4px 12px; font-size: 12px;
+      color: rgba(255,255,255,.9); margin-top: 10px; font-weight: 600;
+    }
     .section-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text); }
     .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
     .chart-card {
@@ -120,7 +131,13 @@ export class AprendizDashboardComponent implements OnInit {
     return dias.map(d => ({ label: this.LABELS[d], value: conteo[d], color: 'var(--navy)' }));
   });
 
-  constructor(private api: ApiService, public auth: AuthService) {}
+  constructor(private api: ApiService, public auth: AuthService, private tenant: TenantService) {}
+
+  centroLabel(): string {
+    const slug = this.tenant.slug;
+    if (!slug || slug === 'default') return 'Centro de Formación';
+    return slug.split(/[-_]/).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
 
   ngOnInit() {
     const fichaId = this.auth.currentUser()?.fichaId;
