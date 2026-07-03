@@ -131,10 +131,6 @@ export class ApiService {
   updateUbicacion(id: any, d: any) { return this.http.patch(`${BASE}/ambientes/${id}`, d); }
   deleteUbicacion(id: any) { return this.http.delete(`${BASE}/ambientes/${id}`); }
 
-  // ── Configuracion (horarios_db) ───────────────────────────────
-  getConfiguracion() { return this.http.get<any>(`${BASE}/configuracion`); }
-  updatePin(pin: string) { return this.http.patch(`${BASE}/configuracion/pin`, { pin }); }
-
   // ── Upload ────────────────────────────────────────────────────
   uploadFoto(file: File) {
     const fd = new FormData();

@@ -78,10 +78,6 @@ export class AuthService {
     }
   }
 
-  verifyPin(pin: string) {
-    return this.http.post<{ valid: boolean }>(`${this.API}/verify-pin`, { pin });
-  }
-
   register(data: any) {
     return this.http.post(`${this.API}/register`, data);
   }

@@ -66,14 +66,14 @@ export const routes: Routes = [
               import('./features/admin/usuarios/usuarios.component').then((m) => m.AdminUsuariosComponent),
           },
           {
+            path: 'usuarios/registrar',
+            loadComponent: () =>
+              import('./features/admin/usuarios/register-usuario.component').then((m) => m.RegisterUsuarioComponent),
+          },
+          {
             path: 'solicitudes',
             loadComponent: () =>
               import('./features/admin/solicitudes/solicitudes.component').then((m) => m.AdminSolicitudesComponent),
-          },
-          {
-            path: 'configuracion',
-            loadComponent: () =>
-              import('./features/admin/configuracion/configuracion.component').then((m) => m.AdminConfiguracionComponent),
           },
         ],
       },
