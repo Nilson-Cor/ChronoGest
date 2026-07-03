@@ -791,7 +791,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
                     {{ formatDiaClaseFull(r.fechaInicio) }} @if (r.fechaFin && r.fechaFin !== r.fechaInicio) { → {{ formatDiaClaseFull(r.fechaFin) }} }
                   </span>
                 } @else {
-                  <span style="font-size:11px;color:var(--text-muted);">Sin fechas asignadas</span>
+                  <span style="font-size:11px;color:var(--text-muted);font-style:italic;">Elige la fecha de inicio y fin de este resultado</span>
                 }
               </div>
 
@@ -827,13 +827,13 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
         </div>
         <div class="grid-2 mt-3 gap-3">
           <div class="form-group">
-            <label class="form-label">Inicio</label>
+            <label class="form-label">Inicio de competencia</label>
             <input type="date" class="form-control"
                    [ngModel]="compForm.fechaInicio"
                    (ngModelChange)="onCompFechaInicioChange($event)">
           </div>
           <div class="form-group">
-            <label class="form-label">Fin</label>
+            <label class="form-label">Fin de competencia</label>
             <input type="date" class="form-control"
                    [ngModel]="compForm.fechaFin"
                    (ngModelChange)="onCompFechaFinChange($event)">
@@ -843,6 +843,10 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
         <!-- Mini-calendario de días de clase -->
         @if (compForm.fechaInicio && compForm.fechaFin) {
           <div class="comp-cal-wrap mt-3">
+            <div class="comp-cal-hint">
+              <lucide-icon name="info" [size]="12"></lucide-icon>
+              Marca los días de clase para esta competencia
+            </div>
             <div class="comp-cal-header">
               <button class="comp-cal-nav" (click)="compCalPrevMes()" title="Mes anterior">&#8249;</button>
               <span class="comp-cal-title">{{ formatCompCalMes() }}</span>
@@ -875,7 +879,10 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
 
         <div class="btn-row mt-4">
           <button class="btn btn-outline" (click)="compModal.set(null)">Cancelar</button>
-          <button class="btn btn-blue" (click)="saveComp()">Guardar</button>
+          <button class="btn btn-blue" [disabled]="!compFormValid()" (click)="saveComp()"
+                  [title]="compFormValid() ? '' : 'Completa todos los campos antes de guardar'">
+            Guardar
+          </button>
         </div>
       </div>
     </div>
@@ -1383,6 +1390,23 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
       overflow: hidden; background: var(--surface);
       pointer-events: none;
     }
+
+    /* ── Hint de calendario de competencia ── */
+    .comp-cal-hint {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--text-muted); font-style: italic;
+      margin-bottom: 8px; padding: 5px 8px;
+      border-radius: 6px; background: var(--surface2);
+    }
+
+    /* ── Dark mode amb-cards ── */
+    :host-context(.dark) .amb-card-libre  { background: rgba(22,163,74,.12); border-color: rgba(134,239,172,.3); color: #86efac; }
+    :host-context(.dark) .amb-card-libre:hover { background: rgba(22,163,74,.2); border-color: rgba(134,239,172,.5); }
+    :host-context(.dark) .amb-card-conflicto { background: rgba(217,119,6,.12); border-color: rgba(251,191,36,.3); color: #fbbf24; }
+    :host-context(.dark) .amb-area-tag { background: rgba(3,105,161,.2); color: #7dd3fc; }
+    :host-context(.dark) .amb-area-tag-amber { background: rgba(217,119,6,.15); color: #fbbf24; }
+    :host-context(.dark) .ubi-tab:hover { background: rgba(37,99,235,.12); border-color: rgba(96,165,250,.3); }
+    :host-context(.dark) .hist-horas-btn { background: rgba(29,78,216,.15); border-color: rgba(96,165,250,.3); }
   `]
 })
 export class InstructorMisHorariosComponent implements OnInit, OnDestroy {
@@ -2319,7 +2343,14 @@ export class InstructorMisHorariosComponent implements OnInit, OnDestroy {
     return RESULTADO_ESTADO_INFO[estadoResultado(r, this.hoyIso)];
   }
 
+  compFormValid(): boolean {
+    const f = this.compForm;
+    if (!f.nombre?.trim() || !f.fechaInicio || !f.fechaFin) return false;
+    return this.compResultados().every(r => r.texto?.trim());
+  }
+
   saveComp() {
+    if (!this.compFormValid()) return;
     const resultados = this.compResultados()
       .map(r => ({ ...r, texto: r.texto.trim() }))
       .filter(r => r.texto);

@@ -372,6 +372,35 @@ import { environment } from '../../../../environments/environment';
     .lightbox-download { display:flex;align-items:center;gap:5px;color:#fff;text-decoration:none;padding:8px 14px;font-size:12px;background:rgba(255,255,255,.1); }
     .spin { animation:spin .8s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── Dark mode ── */
+    :host-context(.dark) .sol-row.pending-row td { background: rgba(217,119,6,.08); }
+    :host-context(.dark) .sol-row.pending-row:hover td { background: rgba(217,119,6,.14); }
+    :host-context(.dark) .sol-row.expanded td { background: rgba(37,99,235,.08) !important; }
+    :host-context(.dark) .expand-panel { background: var(--surface2); border-top-color: var(--border); }
+    :host-context(.dark) .horario-side.actual   { background: var(--surface2); border-color: var(--border); }
+    :host-context(.dark) .horario-side.propuesta { background: rgba(37,99,235,.1); border-color: rgba(96,165,250,.3); }
+    :host-context(.dark) .motivo-box  { background: rgba(217,119,6,.1); border-color: rgba(251,191,36,.3); }
+    :host-context(.dark) .motivo-lbl  { color: #fbbf24; }
+    :host-context(.dark) .motivo-txt  { color: #fde68a; }
+    :host-context(.dark) .resp-box    { background: rgba(22,163,74,.1); border-color: rgba(134,239,172,.3); color: #86efac; }
+    :host-context(.dark) .file-link   { background: var(--surface2); border-color: var(--border); color: #93c5fd; }
+    :host-context(.dark) .file-link:hover { background: var(--surface); }
+    :host-context(.dark) .estado-badge.pendiente { background: rgba(217,119,6,.15);  color: #fbbf24; }
+    :host-context(.dark) .estado-badge.aprobado  { background: rgba(22,163,74,.15);  color: #86efac; }
+    :host-context(.dark) .estado-badge.rechazado { background: rgba(220,38,38,.15);  color: #fca5a5; }
+    :host-context(.dark) .estado-badge.cancelado { background: rgba(100,116,139,.15); color: #94a3b8; }
+    :host-context(.dark) .btn-sm-green { background: rgba(22,163,74,.15);  border-color: rgba(134,239,172,.3); color: #86efac; }
+    :host-context(.dark) .btn-sm-green:hover { background: rgba(22,163,74,.25); }
+    :host-context(.dark) .btn-sm-red   { background: rgba(220,38,38,.15);  border-color: rgba(252,165,165,.3); color: #fca5a5; }
+    :host-context(.dark) .btn-sm-red:hover   { background: rgba(220,38,38,.25); }
+    :host-context(.dark) .resp-badge   { background: rgba(22,163,74,.15);  border-color: rgba(134,239,172,.3); color: #86efac; }
+    :host-context(.dark) .btn-aprobar  { background: rgba(22,163,74,.15);  border-color: rgba(134,239,172,.3); color: #86efac; }
+    :host-context(.dark) .btn-aprobar:hover  { background: rgba(22,163,74,.25); }
+    :host-context(.dark) .btn-rechazar { background: rgba(220,38,38,.15);  border-color: rgba(252,165,165,.3); color: #fca5a5; }
+    :host-context(.dark) .btn-rechazar:hover { background: rgba(220,38,38,.25); }
+    :host-context(.dark) .side-label   { color: var(--text-muted); }
+    :host-context(.dark) .side-time    { color: #93c5fd; }
   `],
 })
 export class AdminSolicitudesComponent implements OnInit {

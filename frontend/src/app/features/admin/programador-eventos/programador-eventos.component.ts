@@ -450,6 +450,11 @@ const TIPO_COLORS: Record<string, { bg: string; text: string }> = {
     .error-msg { background:#fee2e2;color:#991b1b;border-radius:8px;padding:10px 14px;font-size:13px; }
     textarea.form-control { resize: vertical; font-family: inherit; }
     .ml-auto { margin-left: auto; }
+
+    /* ── Dark mode ── */
+    :host-context(.dark) .ficha-check-row.selected { background: rgba(37,99,235,.12); }
+    :host-context(.dark) .ficha-check-row:hover { background: rgba(255,255,255,.05); }
+    :host-context(.dark) .error-msg { background: rgba(220,38,38,.15); color: #fca5a5; }
   `],
 })
 export class ProgramadorEventosComponent implements OnInit {

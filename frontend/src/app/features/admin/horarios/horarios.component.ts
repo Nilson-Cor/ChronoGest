@@ -1027,7 +1027,7 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     /* Ambiente disponible clickeable */
     .disp-card.disponible-click { cursor: pointer; transition: border-color .15s, background .15s, box-shadow .15s; }
     .disp-card.disponible-click:hover {
-      background: #f0fdf4; border-color: #16a34a; box-shadow: 0 0 0 2px rgba(22,163,74,.15);
+      background: rgba(22,163,74,.12); border-color: #16a34a; box-shadow: 0 0 0 2px rgba(22,163,74,.15);
     }
     .disp-card.disponible-click .disp-status { color: #16a34a; font-weight: 600; font-size: 11px; }
     .matrix-empty {
@@ -1281,6 +1281,16 @@ const RESULTADO_ESTADO_INFO: Record<ResultadoEstado, { label: string; bg: string
     .hist-horas-btn:hover { background:var(--blue); color:#fff; border-color:var(--blue); }
     /* ── Popover flotante días/horas del historial ── */
     .hist-dias-popover { position:fixed; z-index:10000; min-width:250px; max-width:340px; border:1px solid var(--border); border-radius:7px; box-shadow:0 8px 24px rgba(0,0,0,.15); overflow:hidden; background:var(--surface); pointer-events:none; }
+
+    /* ── Dark mode overrides ── */
+    :host-context(.dark) .jornada-det-ok  { background: rgba(29,78,216,.15); border-color: rgba(96,165,250,.3); color: #93c5fd; }
+    :host-context(.dark) .jornada-det-span{ background: rgba(217,119,6,.15);  border-color: rgba(251,191,36,.3);  color: #fbbf24; }
+    :host-context(.dark) .wt-transversal-pill { background: rgba(217,119,6,.15); border-color: rgba(251,191,36,.3); color: #fbbf24; }
+    :host-context(.dark) .disp-card.ocupado { background: rgba(220,38,38,.15); border-color: rgba(239,68,68,.3); color: #fca5a5; }
+    :host-context(.dark) .disp-tag { background: rgba(37,99,235,.2); color: #93c5fd; }
+    :host-context(.dark) .error-msg { background: rgba(220,38,38,.15); color: #fca5a5; border: 1px solid rgba(239,68,68,.3); }
+    :host-context(.dark) .tt-clase-chip { background: rgba(29,78,216,.2); border-color: rgba(96,165,250,.3); color: #93c5fd; }
+    :host-context(.dark) .hist-horas-btn { background: rgba(29,78,216,.15); border-color: rgba(96,165,250,.3); }
   `],
 })
 export class AdminHorariosComponent implements OnInit, OnDestroy {

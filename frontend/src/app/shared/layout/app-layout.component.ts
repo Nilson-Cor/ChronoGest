@@ -476,6 +476,11 @@ import { environment } from '../../../environments/environment';
       display: flex; align-items: center; gap: 4px; transition: background .15s;
     }
     .btn-leer-alerta:hover { background: #fef3c7; }
+
+    /* ── Dark mode sidebar ── */
+    :host-context(.dark) .sidebar { background: #0c1628; }
+    :host-context(.dark) .btn-leer-alerta { border-color: rgba(251,191,36,.4); color: #fbbf24; }
+    :host-context(.dark) .btn-leer-alerta:hover { background: rgba(217,119,6,.15); }
   `],
 })
 export class AppLayoutComponent implements OnDestroy {
